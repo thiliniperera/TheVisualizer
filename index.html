@@ -11,46 +11,109 @@
         padding: 0px
       }
     </style>
-    <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&signed_in=true"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&signed_in=true"></script>   
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
+    <script src="shp.js"></script>
+  
     <script>
-var map;
-function initialize() {
-  map = new google.maps.Map(document.getElementById('map-canvas'), {
-    zoom: 4,
-    center: {lat: -28, lng: 137.883}
-  });
+        var map;
+        function initialize() {
+          // set up the map
+          map = new google.maps.Map(document.getElementById('map-canvas'), {
+            center: new google.maps.LatLng(0, 0),
+            zoom: 2
+          });
+        }
+        
+function loadFile(){
+    
+    shp("sample.shp").then(function(geojson){
+	console.log(geojson[0]);
+        
+        
+        var width = 1000,
+    height = 1000;
 
-  // [START snippet-load]
-  // Load GeoJSON.
-  map.data.loadGeoJson('https://storage.googleapis.com/maps-devrel/google.json');
-  // [END snippet-load]
+var projection = d3.geo.equirectangular()
+    .scale(1000)
+    .translate([width / 2, height / 2])
+    .precision(.1);
 
-  // [START snippet-style]
-  // Set the stroke width, and fill color for each polygon
-  var featureStyle = {
-    fillOpacity: 0.1,
-    fillColor: 'blue',
-    strokeWeight: 3
-  }
-  map.data.setStyle(featureStyle);
-    // [END snippet-style]
-
-//override style on click
-
-map.data.addListener('click', function(event) {
-   map.data.overrideStyle(event.feature, {fillColor: 'red',fillOpacity: 0.8});
-});
+var path = d3.geo.path()
+    .projection(projection);
 
 
+var svg = d3.select("body").append("svg")
+    .attr("width", width)
+    .attr("height", height);
+console.log("Hi");
+svg.selectAll("path")
+        .data(geojson[0].features)
+        .enter()
+        .append("path")
+        .attr("d", path);
+    
+    console.log("Bye");
+    var i=0;
+	
+    console.log("Hi");
+        
+        
 
 
-}
+
+ }       
+        
+        
+        
+/*function myFunction(){
+    var x = document.getElementById("myFile");
+    var txt = "";
+    if ('files' in x) {
+        if (x.files.length == 0) {
+            //no files are selected
+            txt = "Select one or more files.";
+        } else {
+            for (var i = 0; i < x.files.length; i++) {
+                
+                var file = x.files[i];
+                fr = new FileReader();
+                fr.onload = receivedText;
+                fr.readAsText(file);
+                
+                function receivedText(e) {
+                        loadGeoJsonString(e.target.result);
+               
+            }
+                
+                
+            }
+        }
+    } 
+    else {
+        if (x.value == "") {
+            txt += "Select one or more files.";
+        } else {
+            txt += "The files property is not supported by your browser!";
+            txt  += "<br>The path of the selected file: " + x.value; // If the browser does not support the files property, it will return the path of the selected file instead. 
+        }
+    }
+    document.getElementById("demo").innerHTML = txt;
+}*/
+    
+    
+    
+
+        
+        
 
 google.maps.event.addDomListener(window, 'load', initialize);
 
     </script>
   </head>
   <body>
+     <button onclick="loadFile()">Click me</button>
+      
     <div id="map-canvas"></div>
   </body>
 </html>
