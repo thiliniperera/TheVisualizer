@@ -1,119 +1,91 @@
-<!DOCTYPE html>
 <html>
-  <head>
-    <title>Data Layer: Styling</title>
-    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
-    <meta charset="utf-8">
-    <style>
-      html, body, #map-canvas {
-        height: 100%;
-        margin: 0px;
-        padding: 0px
-      }
-    </style>
-    <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&signed_in=true"></script>   
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
-    <script src="shp.js"></script>
-  
-    <script>
-        var map;
-        function initialize() {
-          // set up the map
-          map = new google.maps.Map(document.getElementById('map-canvas'), {
-            center: new google.maps.LatLng(0, 0),
-            zoom: 2
-          });
-        }
-        
-function loadFile(){
+<head>
+<script src="libraries/shp.js"></script>
+<script src="libraries/topojson.js"></script>
+<script src="libraries/d3.js" charset="utf-8"></script>
+<script src="libraries/d3.min.js"></script>
+<script >
+
+function loadShapeFile(){
+
+    //function from shp.js to convert shapefile to geojson
+    shp("shapefiles/EGY_adm.zip").then(function(geojson){
+
+              
+            console.log("geojson loaded");
+            console.log(geojson[1]);
+
+
+            var width = 1000,height = 1000;
+            
+            
+            //creating the canvas to hold the map
+             var canvas= d3.select("body").append("svg")
+                .attr("width", width)
+                .attr("height", height)                
+                .style("border", "1px solid black");
+
+            //project the map on a flat surface using guesses
+            var projection = d3.geo.mercator()
+                .scale(1)
+                .translate([0, 0]);
+
+            //geographic path generator(translate coordinates to pixels on the canvas)
+            var path = d3.geo.path()
+                .projection(projection);
+
+             // using the path determine the bounds of the current map and use 
+             // these to determine better values for the scale and translation
+            var b = path.bounds(geojson[1]),
+                s = .95 / Math.max((b[1][0] - b[0][0]) / width, (b[1][1] - b[0][1]) / height),
+                 //scaled the bounding box to 95% of the canvas, rather than 100%, so there’s a little extra room on the edges for strokes and surrounding features or padding.
+                t = [(width - s * (b[1][0] + b[0][0])) / 2, (height - s * (b[1][1] + b[0][1])) / 2];
+
+
+
+            // new projection
+              projection = d3.geo.mercator()
+                             .scale(s).translate(t);
+              path = path.projection(projection);
+
+            //drawing path on the canvas
+           var areas = canvas.selectAll("path")
+                    .data(geojson[1].features)
+                    .enter()
+                    .append("path")
+                    .attr("d", path)
+                    .attr("fill", "#81F781")
+                    .attr("stroke", "#222");
+
+
+              //including text if available
+                canvas.append("text")
+                      .attr("x",function(d){return path.centroid(d)[0];})
+                      .attr("y",function(d){return path.centroid(d)[1];})
+                      .text(function(d){return d.properties.LNNAMN;});
+          
+
+     
+    });
     
-    shp("sample.shp").then(function(geojson){
-	console.log(geojson[0]);
-        
-        
-        var width = 1000,
-    height = 1000;
+   
+}
 
-var projection = d3.geo.equirectangular()
-    .scale(1000)
-    .translate([width / 2, height / 2])
-    .precision(.1);
-
-var path = d3.geo.path()
-    .projection(projection);
-
-
-var svg = d3.select("body").append("svg")
-    .attr("width", width)
-    .attr("height", height);
-console.log("Hi");
-svg.selectAll("path")
-        .data(geojson[0].features)
-        .enter()
-        .append("path")
-        .attr("d", path);
-    
-    console.log("Bye");
-    var i=0;
-	
-    console.log("Hi");
-        
-        
+function zoomShapeFile(){
 
 
 
- }       
-        
-        
-        
-/*function myFunction(){
-    var x = document.getElementById("myFile");
-    var txt = "";
-    if ('files' in x) {
-        if (x.files.length == 0) {
-            //no files are selected
-            txt = "Select one or more files.";
-        } else {
-            for (var i = 0; i < x.files.length; i++) {
-                
-                var file = x.files[i];
-                fr = new FileReader();
-                fr.onload = receivedText;
-                fr.readAsText(file);
-                
-                function receivedText(e) {
-                        loadGeoJsonString(e.target.result);
-               
-            }
-                
-                
-            }
-        }
-    } 
-    else {
-        if (x.value == "") {
-            txt += "Select one or more files.";
-        } else {
-            txt += "The files property is not supported by your browser!";
-            txt  += "<br>The path of the selected file: " + x.value; // If the browser does not support the files property, it will return the path of the selected file instead. 
-        }
-    }
-    document.getElementById("demo").innerHTML = txt;
-}*/
-    
-    
-    
 
-        
-        
+}
 
-google.maps.event.addDomListener(window, 'load', initialize);
 
-    </script>
-  </head>
-  <body>
-     <button onclick="loadFile()">Click me</button>
-      
-    <div id="map-canvas"></div>
-  </body>
+</script>
+</head>
+
+<body>
+<input type="submit" onClick="loadShapeFile()"></input>
+
+<p id="demo"></p>
+
+</body>
 </html>
