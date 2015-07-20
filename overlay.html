@@ -12,13 +12,33 @@
   <body>
     <script type="text/javascript">
       
-
+    var fillcolor;
+    var strokecolor="#ffffff";
+    var strokewidth=3;
+    var opacity=0.8;
+    
     var dataset;
     var svg;
     var projection;
     var path;
     var scale;
      var width = 1000,height = 1000;
+     
+     
+    
+     
+     
+    function getMapProperties(fillcol,opacit,strokecol,strokewid){
+         
+         fillcolor=fillcol;
+         opacity=opacit;
+         strokecolor=strokecol;
+         strokewidth=strokewid;
+        
+     }
+     
+    
+         console.log("load fn called");
    
     d3.csv("LKA_data.csv",function(error,data){
         //asynchronous method, rest of your code is executed even while JavaScript is simultaneously waiting for the file to finish downloading into the browser.
@@ -31,9 +51,11 @@
         }
     });
     
-
+    
 
 function loadVisualization(){
+    
+     console.log("load  vis fn called");
 
         //converting file to geoJson 
       shp("shapefiles/LKA_adm.zip").then(function(geoJson) {
@@ -88,15 +110,16 @@ function loadVisualization(){
                     .enter()
                     .append("path")
                     .attr("d", path)
-                    .attr("stroke","black")
-                    .attr("stroke-width",2)
-                    .attr("opacity",1)
+                    .attr("stroke",strokecolor)
+                    .attr("stroke-width",strokewidth)
+                    .attr("opacity",opacity)
                     .style("fill",function(d){
                         // get the data value
                  
                         var val = d.properties.Value;
-                       var col =getColour(val);
-                       //console.log(col);
+                         
+                       var col = getColour(val);
+                       console.log(col);
                         return col;
                 
                     });
@@ -109,23 +132,25 @@ function loadVisualization(){
 
 }
 
-function getColour(col){
+function getColour(value){
+     console.log("huuuuughgjh");
+    
     //get colour method is called multiple times
-    console.log("col "+col);
-    if(col === undefined){
-        return rgb(255,255,255);
-    
+    if(value === undefined){
+       //the default color will be displayed
+        console.log("huuaau");
+       return "#FE2EF7";
+    }else{
+         var val = (value- min())/(max()-min())*255;
+         //this depends on fillcolor
+         console.log("huuuuu");
+    return rgb(val,0,0);
     }
-    else{
-         var val = (col - min())/(max()-min())*255;
-    
-   
-    return rgb(val,255,0);
-    }
-    
+     
 }
 
 function rgb(r, g, b){
+     console.log("rgb");
   r = Math.floor(r);
   g = Math.floor(g);
   b = Math.floor(b);
@@ -160,13 +185,6 @@ function min(){
     return min;
 }
 
-function loadBarChart(){
-    
-    
-    
-    
-    
-}
 
 
 
@@ -174,6 +192,20 @@ function loadBarChart(){
 
     </script>
     <h1>The Visuvalizer</h1>
+    
+           <form name="Map Properties">
+           Fill Color:
+           <input type="color" name="fillcol" value="#ff0000">
+           Opacity :
+           <input type="range" name="opacit" min="0" max="1">
+           Stroke Color:
+           <input type="color" name="strokecol" value="#ffffff">
+           Stroke Width:
+           <input type="number" name="strokewid" min="1" max="10">
+           <input type="submit" onclick="getMapProperties(fillcol,opacit,strokecol,strokewid);">
+            </form>
+           
+    
     
   </body>
 </html>
