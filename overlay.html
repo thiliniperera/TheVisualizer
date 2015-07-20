@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no"/>    
+    <script src="libraries/shp.js"></script>
+    <script src="libraries/topojson.js"></script>
+    <script src="libraries/d3.js" charset="utf-8"></script>
+    <script src="libraries/d3.min.js"></script>
+    
+   
+  </head>
+  <body>
+    <script type="text/javascript">
+
+    var dataset;
+    var svg;
+    var projection;
+    var path;
+    var scale;
+     var width = 1000,height = 1000;
+   
+    d3.csv("LKA_data.csv",function(error,data){
+        //asynchronous method, rest of your code is executed even while JavaScript is simultaneously waiting for the file to finish downloading into the browser.
+               
+        if(error){
+            console.log(error);
+        }else{   
+            dataset = data;
+            loadVisualization();            
+        }
+    });
+    
+
+
+function loadVisualization(){
+
+        //converting file to geoJson 
+      shp("shapefiles/LKA_adm.zip").then(function(geoJson) {
+            
+            //merging csv data with geojson data
+            
+            for(var i=0;i<dataset.length;i++){
+                //iterate through each district in data file
+                var districtName = dataset[i].District;
+                
+                //Grab data value, and convert from string to float
+                var dataValue = parseFloat(dataset[i].Value);
+                
+                
+                                
+                //Get the corresponding district from geoJson file
+                
+                for(var j=0;j<geoJson[1].features.length;j++){
+                    
+                    var geoDistrict = geoJson[1].features[j].properties.NAME_1;
+                    
+                    if(geoDistrict == districtName){
+                        //assign a new variable to geojson object containing data value                         
+                        geoJson[1].features[j].properties.Value = dataValue;
+                        
+                    }                   
+                  
+                   
+                }
+            }           
+             //create the svg element 
+
+           
+                
+            scale = 8000;
+                
+            projection = d3.geo.mercator()
+                .center([81,6.5]) //replace with the centroid
+                .scale(scale)    //scale and translate should be adjusted as suitable
+                .translate([width/2,height/2]);
+
+            path = d3.geo.path()
+                .projection(projection);
+
+
+             svg = d3.select("body").append("svg")
+                .attr("width", width)
+                .attr("height", height);
+
+            svg.selectAll("path")
+                    .data(geoJson[1].features)
+                    .enter()
+                    .append("path")
+                    .attr("d", path)
+                    .attr("stroke","black")
+                    .attr("stroke-width",2)
+                    .attr("opacity",0.5)
+                    .style("fill",function(d){
+                        // get the data value
+                        var val = d.properties.Value;
+                       
+                        if(val>25){
+                            return "red";
+                        }else{
+                            return "#ccc";
+                        }
+                
+                    });
+        });
+        
+        
+       
+
+        
+
+}
+
+function loadBarChart(){
+    
+    
+    
+    
+    
+}
+
+
+
+
+
+    </script>
+    <h1>The Visuvalizer</h1>
+    
+  </body>
+</html>

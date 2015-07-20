@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<html>
+    <head>
+        
+        <title>Home</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script src="libraries/shp.js"></script>
+        <script src="libraries/topojson.js"></script>
+        <script src="libraries/d3.js" charset="utf-8"></script>
+        <script src="libraries/d3.min.js"></script>
+        <script src="http://maps.googleapis.com/maps/api/js"></script>
+        
+        <script type="text/javascript">
+            
+            function initialize(){                
+                // set up the google map
+                var mapOptions = {
+               zoom: 6,
+               center: new google.maps.LatLng(7, 81),
+               mapTypeId: google.maps.MapTypeId.TERRAIN
+                 };
+                 //initializing the map
+               map = new google.maps.Map(document.getElementById('googleMap'),mapOptions);
+               console.log("google map loaded");
+             }
+            
+            //function from shp.js to convert shapefile to geojson
+    shp("shapefiles/LKA_ADM.zip").then(function(geojson){
+              
+            console.log("geojson loaded");
+            console.log(geojson[0]);
+            var width = 1000,height = 500;
+            
+            
+            //creating the canvas to hold the map
+             var canvas= d3.select("body").append("svg")
+                .attr("width", width)
+                .attr("height", height)                
+                .style("border", "1px solid black");
+            //project the map on a flat surface using guesses
+            var projection = d3.geo.mercator()
+                .scale(1)
+                .translate([0, 0]);
+            //geographic path generator(translate coordinates to pixels on the canvas)
+            var path = d3.geo.path()
+                .projection(projection);
+             // using the path determine the bounds of the current map and use 
+             // these to determine better values for the scale and translation
+            var b = path.bounds(geojson[0]),
+                s = .95 / Math.max((b[1][0] - b[0][0]) / width, (b[1][1] - b[0][1]) / height),
+                 //scaled the bounding box to 95% of the canvas, rather than 100%, so there’s a little extra room on the edges for strokes and surrounding features or padding.
+                t = [(width - s * (b[1][0] + b[0][0])) / 2, (height - s * (b[1][1] + b[0][1])) / 2];
+            // new projection
+              projection = d3.geo.mercator()
+                             .scale(s).translate(t);
+              path = path.projection(projection);
+            //drawing path on the canvas
+           var areas = canvas.selectAll("path")
+                    .data(geojson[0].features)
+                    .enter()
+                    .append("path")
+                    .attr("d", path)
+                    .attr("fill", "#81F781")
+                    .attr("stroke", "#222");
+              //including text if available
+                canvas.append("text")
+                      .attr("x",function(d){return path.centroid(d)[0];})
+                      .attr("y",function(d){return path.centroid(d)[1];})
+                      .text(function(d){return d.properties.LNNAMN;});
+          
+     
+    });
+    
+                       
+            
+            
+        </script>
+        
+        
+        
+        
+    </head>
+    <body onload="initialize()">
+        
+        <h1>The Visualizer</h1>
+        <p id="demo">Mapping made easy</p>
+        <div id="googleMap" style="width:1000px;height:500px;"></div>
+        
+    </body>
+</html>

@@ -1,0 +1,96 @@
+<html>
+<head>
+<script src="libraries/shp.js"></script>
+    <script src="libraries/topojson.js"></script>
+    <script src="libraries/d3.js" charset="utf-8"></script>
+    <script src="libraries/d3.min.js"></script>
+    
+<script >
+
+function lo(){
+
+
+
+
+    shp("shapefiles/LKA_adm.zip").then(function(geojson){
+
+                console.log(geojson[0]);
+                console.log("executing");
+
+
+                  var width = 1000,
+                height = 1000;
+
+            var projection = d3.geo.mercator()
+                .center([81,6.5])
+                .scale(8000)
+                .translate([500, 500]);
+
+            var path = d3.geo.path()
+                .projection(projection);
+
+
+            var svg = d3.select("body").append("svg")
+                .attr("width", width)
+                .attr("height", height)
+                .style("fill","red");
+
+            svg.selectAll("path")
+                    .data(geojson[1].features)
+                    .enter()
+                    .append("path")
+                    .attr("d", path);
+
+
+
+                    console.log("executing finished");
+
+
+        
+
+    
+
+     
+    });
+    
+    var svg = d3.select("body").append("svg").attr("width", 50).attr("height", 50).append("circle").attr("cx", 25).attr("cy", 25).attr("r", 25).style("fill", "purple");
+
+}
+
+function loo(){
+
+   shp("ne_10m_land.zip").then(function(geojson){
+        console.log("Shape file loaded");
+        d3.select("body").append("svg")
+                                   .attr("width", 200)
+                                   .attr("height", 200)
+                                   .style("border", "1px solid black");
+       
+
+       
+    });
+
+  
+
+var svg = d3.select("body").append("svg").attr("width", 50).attr("height", 50).append("circle").attr("cx", 25).attr("cy", 25).attr("r", 25).style("fill", "purple");
+
+
+    
+    
+
+     
+    
+
+    
+
+
+}
+</script>
+</head>
+
+<body>
+<input type="submit" onClick="lo()">ok</input>
+<p id="demo"></p>
+
+</body>
+</html>

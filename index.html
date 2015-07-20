@@ -4,86 +4,128 @@
 <script src="libraries/topojson.js"></script>
 <script src="libraries/d3.js" charset="utf-8"></script>
 <script src="libraries/d3.min.js"></script>
+<script src="http://maps.googleapis.com/maps/api/js"></script>
 <script >
 
-function loadShapeFile(){
+var map;
+function initialize() {
+      // set up the google map
+     var mapOptions = {
+    zoom: 6,
+    center: new google.maps.LatLng(178, -16),
+    mapTypeId: google.maps.MapTypeId.TERRAIN
+      };
+      //initializing the map
+    map = new google.maps.Map(document.getElementById('googleMap'),mapOptions);
+    console.log("executing");
+    
+    
+    }
+    
 
-    //function from shp.js to convert shapefile to geojson
-    shp("shapefiles/EGY_adm.zip").then(function(geojson){
+    
+     //function from shp.js to convert shapefile to geojson
+    shp("shapefiles/FJI_adm.zip").then(function(geojson){ 
+    
+    console.log(geojson[0]);
+    
+    //creating google map overlay
+    overlay = new google.maps.OverlayView();
+    overlay.draw = drawOverlay;    
+    overlay.onAdd = addOverlay;
+         
 
-              
-            console.log("geojson loaded");
-            console.log(geojson[1]);
-
-
-            var width = 1000,height = 1000;
-            
-            
-            //creating the canvas to hold the map
-             var canvas= d3.select("body").append("svg")
-                .attr("width", width)
-                .attr("height", height)                
-                .style("border", "1px solid black");
-
-            //project the map on a flat surface using guesses
-            var projection = d3.geo.mercator()
-                .scale(1)
-                .translate([0, 0]);
-
-            //geographic path generator(translate coordinates to pixels on the canvas)
-            var path = d3.geo.path()
-                .projection(projection);
-
-             // using the path determine the bounds of the current map and use 
-             // these to determine better values for the scale and translation
-            var b = path.bounds(geojson[1]),
-                s = .95 / Math.max((b[1][0] - b[0][0]) / width, (b[1][1] - b[0][1]) / height),
-                 //scaled the bounding box to 95% of the canvas, rather than 100%, so there’s a little extra room on the edges for strokes and surrounding features or padding.
-                t = [(width - s * (b[1][0] + b[0][0])) / 2, (height - s * (b[1][1] + b[0][1])) / 2];
-
-
-
-            // new projection
-              projection = d3.geo.mercator()
-                             .scale(s).translate(t);
-              path = path.projection(projection);
-
-            //drawing path on the canvas
-           var areas = canvas.selectAll("path")
-                    .data(geojson[1].features)
-                    .enter()
-                    .append("path")
-                    .attr("d", path)
-                    .attr("fill", "#81F781")
-                    .attr("stroke", "#222");
-
-
-              //including text if available
-                canvas.append("text")
-                      .attr("x",function(d){return path.centroid(d)[0];})
-                      .attr("y",function(d){return path.centroid(d)[1];})
-                      .text(function(d){return d.properties.LNNAMN;});
-          
-
+     overlay.setMap(map);
      
+     function addOverlay(){
+         console.log("executing addoverlay");
+         //create D3 svg elements
+         gm_svg_layer = d3.select(overlay.getPanes().overlayLayer)
+                 .append("div")
+                 .append("svg")
+                 .append("g");
+     }
+     
+     function drawOverlay(){
+         //getting the current projection for the google map
+         console.log("executing drawoverlay");
+         gm_projection = overlay.getProjection();
+         
+         var gm_path = d3.geo.path().projection(gm_google_map_d3_projection);
+         
+         //standard D3 plotting
+         console.log("standard d3 plotting");
+         
+         var gm_d3_map = gm_svg_layer.selectAll("path")
+                    .data(geojson[0].features)
+                    .attr("d", gm_path)
+                    .enter();
+                   
+         gm_d3_map.append("path")
+                 .attr("d",gm_path)
+                 .attr("stroke","black")
+                 .attr("opacity",0.5);
+         
+         console.log("finish executing drawoverlay");
+     }
+     
+     
+     function gm_google_map_d3_projection(coordinates){
+         
+         //translate google into D3
+         console.log("executing gm_google_map_d3_projection");
+         console.log(coordinates[0]);
+         console.log(coordinates[1]);
+         
+         
+         var googleCoordinates = new google.maps.LatLng(coordinates[1],coordinates[0]);
+         
+         var pixelCoordinates = gm_projection.fromLatLngToDivPixel(googleCoordinates);
+         console.log("got coordinates");
+         return [pixelCoordinates.x+4000,pixelCoordinates.y+4000];
+         
+     }
+     
+     
+    
     });
     
+    
+     
+     
+     
+     
+    
+    
+    
+    
+    
+    
+
    
-}
-
-function zoomShapeFile(){
+    
 
 
 
 
-}
 
 
+
+//listener to load the google map 
+google.maps.event.addDomListener(window, 'load', initialize);
+ 
 </script>
 </head>
 
 <body>
-<input type="submit" onClick="loadShapeFile()"></input>
+<h1>The Visualizer</h1>
+<p id="demo">Mapping made easy</p>
+
+
+
+<div id="googleMap" style="width:1000px;height:500px;"></div>
+
+
 
 <p id="demo"></p>
 
