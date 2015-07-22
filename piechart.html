@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<html>
+    <head>
+        <title>TODO supply a title</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+       <script src="libraries/d3.js"></script>
+        <script src="libraries/d3.min.js"></script>
+        
+        <style>
+
+        body {
+          font: 10px sans-serif;
+        }
+
+        .arc path {
+          stroke: #fff;
+        }
+
+        </style>
+    </head>
+    <body>
+        
+         <h1>The Visuvalizer</h1>
+    
+           <form name="Pie Properties">
+           Fill Color:
+           <input type="color" name="fillcol" value="#ff0000">
+          
+           <input type="submit">
+            </form>
+        
+        <script>
+            
+            //dimensions
+            var width =500,height=500,radius= Math.min(width,height)/2;
+            
+            //drawing the arc 
+            var arc = d3.svg.arc()
+                    .outerRadius(radius-10)
+                    .innerRadius(0);
+            
+           
+
+            
+            var piechart = d3.layout.pie()
+                                .sort(null)
+                                .value(function(d){return d.Value;});
+            
+            var svg = d3.select("body").append("svg")
+                        .attr("width", width)
+                        .attr("height", height)
+                        .append("g")
+                        .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
+            
+            // load the data
+            d3.csv("LKA_data.csv", function(error, data) {
+              if (error) console.log(error);
+              
+              console.log(data);
+              
+               data.forEach(function(d) {
+                    d.Value= +d.Value;
+               });
+               
+               var g = svg.selectAll(".arc")
+                            .data(piechart(data))
+                            .enter().append("g")
+                            .attr("class", "arc");
+
+                g.append("path")
+                    .attr("d", arc)
+                    .style("fill","#FE2EF7");
+
+                 g.append("text")
+                                .attr("transform", function(d) { return "translate(" + arc.centroid(d) + ")"; })
+                                .attr("dy", ".35em")
+                                .style("text-anchor", "middle")
+                                .text(function(d) { return d.Value; });           
+               
+
+            
+            });
+
+            
+            
+        </script>
+           
+           
+    
+    </body>
+</html>
