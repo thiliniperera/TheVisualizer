@@ -34,11 +34,13 @@
          opacity=opacit;
          strokecolor=strokecol;
          strokewidth=strokewid;
+         
+         loadVisualization();
         
      }
      
     
-         console.log("load fn called");
+         
    
     d3.csv("LKA_data.csv",function(error,data){
         //asynchronous method, rest of your code is executed even while JavaScript is simultaneously waiting for the file to finish downloading into the browser.
@@ -55,7 +57,7 @@
 
 function loadVisualization(){
     
-     console.log("load  vis fn called");
+     
 
         //converting file to geoJson 
       shp("shapefiles/LKA_adm.zip").then(function(geoJson) {
@@ -133,24 +135,24 @@ function loadVisualization(){
 }
 
 function getColour(value){
-     console.log("huuuuughgjh");
+    
     
     //get colour method is called multiple times
     if(value === undefined){
        //the default color will be displayed
-        console.log("huuaau");
+      
        return "#FE2EF7";
     }else{
          var val = (value- min())/(max()-min())*255;
          //this depends on fillcolor
-         console.log("huuuuu");
+        
     return rgb(val,0,0);
     }
      
 }
 
 function rgb(r, g, b){
-     console.log("rgb");
+    
   r = Math.floor(r);
   g = Math.floor(g);
   b = Math.floor(b);
