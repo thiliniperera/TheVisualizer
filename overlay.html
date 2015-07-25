@@ -12,12 +12,15 @@
   <body>
     <script type="text/javascript">
       
-    var fillcolor;
-    var strokecolor="#ffffff";
+    var fillcolor ;
+    var strokecolor;
     var strokewidth=3;
-    var opacity=0.8;
+    var opacity;
     
     var dataset;
+    var file;
+    
+    
     var svg;
     var projection;
     var path;
@@ -28,21 +31,32 @@
     
      
      
-    function getMapProperties(fillcol,opacit,strokecol,strokewid){
+    function setMapProperties(){
          
-         fillcolor=fillcol;
-         opacity=opacit;
-         strokecolor=strokecol;
-         strokewidth=strokewid;
-         
-         loadVisualization();
+        strokecolor =document.getElementById('strokecol').value;
+        strokewidth = document.getElementById('strokewid').value;
+        fillcolor = document.getElementById('fillcol').value;
+        opacity = document.getElementById('opacit').value;
         
+        svg.attr("stroke",strokecolor)
+            .attr("stroke-width",strokewidth)
+            .attr("opacity",opacity)
+            .selectAll("path")
+            .style("fill",function(d){
+                        // get the data value
+                       var val = d.properties.Value;
+                       var col = getColour(val);
+                        return col;
+                    });
      }
      
     
-         
-   
-    d3.csv("LKA_data.csv",function(error,data){
+     
+    function loadFile(){
+        
+     file = document.getElementById('myFile').files[0];
+    if (file) {
+    d3.csv(file.name,function(error,data){
         //asynchronous method, rest of your code is executed even while JavaScript is simultaneously waiting for the file to finish downloading into the browser.
                
         if(error){
@@ -52,8 +66,12 @@
             loadVisualization();            
         }
     });
+    }else{
+        alert("dispaly error msg, invalid input");
+        
+    }
     
-    
+    }
 
 function loadVisualization(){
     
@@ -103,7 +121,7 @@ function loadVisualization(){
                 .projection(projection);
 
 
-             svg = d3.select("body").append("svg")
+             svg = d3.select('#map').append("svg")
                 .attr("width", width)
                 .attr("height", height);
 
@@ -117,11 +135,9 @@ function loadVisualization(){
                     .attr("opacity",opacity)
                     .style("fill",function(d){
                         // get the data value
-                 
-                        var val = d.properties.Value;
-                         
+                       var val = d.properties.Value;
                        var col = getColour(val);
-                       console.log(col);
+                      // console.log(col);
                         return col;
                 
                     });
@@ -140,23 +156,31 @@ function getColour(value){
     //get colour method is called multiple times
     if(value === undefined){
        //the default color will be displayed
-      
-       return "#FE2EF7";
+       return "#424242" ;
     }else{
-         var val = (value- min())/(max()-min())*255;
-         //this depends on fillcolor
         
-    return rgb(val,0,0);
+         var val = (value- min())/(max()-min());
+        if(fillcolor === undefined){
+            //return blue color as the default color
+            return rgba(0,0,153,val);
+        }else{        
+         //converting hex fill col to decimal         
+         var r =parseInt((fillcolor).substring(1,3).toString(16),16);  
+         var g =parseInt((fillcolor).substring(3,5).toString(16),16);  
+         var b =parseInt((fillcolor).substring(5,7).toString(16),16);  
+        
+        return rgba(r,g,b,val);
+        }
     }
      
 }
 
-function rgb(r, g, b){
+function rgba(r, g, b,a){
     
   r = Math.floor(r);
   g = Math.floor(g);
   b = Math.floor(b);
-  return ["rgb(",r,",",g,",",b,")"].join("");
+  return ["rgba(",r,",",g,",",b,",",a,")"].join("");
 }
 
 function max(){
@@ -195,16 +219,30 @@ function min(){
     </script>
     <h1>The Visuvalizer</h1>
     
+    <input type="file" id="myFile" name="files[]" />
+            
+     <button onclick="loadFile()">Upload</button>
+
+
+
+    
            <form name="Map Properties">
            Fill Color:
-           <input type="color" name="fillcol" value="#ff0000">
+           <input type="color" id="fillcol" >
            Opacity :
-           <input type="range" name="opacit" min="0" max="1">
+           <input type="range" id="opacit" min=0 max=1 step=0.1 default=0.8>
            Stroke Color:
-           <input type="color" name="strokecol" value="#ffffff">
+           <input type="color" id="strokecol">
            Stroke Width:
-           <input type="number" name="strokewid" min="1" max="10">
-           <input type="submit" onclick="getMapProperties(fillcol,opacit,strokecol,strokewid);">
+           <input type="number" id="strokewid" >
+           <div id="option">
+            <input name="updateButton" 
+                 type="button" 
+                value="Update" 
+                onclick="setMapProperties()" />
+            </div>
+           
+           <div id="map" align="center" ></div>
             </form>
            
     

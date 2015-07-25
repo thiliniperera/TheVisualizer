@@ -1,0 +1,42 @@
+ //legend size should depend on no of entries                    
+        var legendRectSize = 18;
+        var legendSpacing = 4;
+        
+        
+        
+        var svg2 = d3.select('#legend') //retrieve the DOM element with id chart
+                        .append('svg')  //append an svg element to the element we've selected.
+                        .attr('width', width)  //set width
+                        .attr('height', height) //set height
+                        .append('g')    //append a group element to the svg element.
+                        .attr('transform', 'translate(' + (width / 2) +  ',' + (height / 2) + ')'); //center the group in svg
+            
+        
+        var legend = svg2.selectAll('.legend')
+                        .data(color.domain())
+                        .enter()
+                        .append('g')
+                        .attr('class', 'legend')
+                        .attr('transform', function(d, i) {
+                          var height = legendRectSize + legendSpacing;
+                          var offset =  height * color.domain().length / 2;
+                          var horz = -2 * legendRectSize;
+                          var vert = i * height - offset;
+                          return 'translate(' + horz + ',' + vert + ')';
+                        });
+        
+                //adding the rectangles 
+                legend.append('rect')
+                    .attr('width', legendRectSize)
+                    .attr('height', legendRectSize)
+                    .style('fill', color)
+                    .style('stroke',"black");
+            
+            //adding text 
+              legend.append('text')
+                    .attr('x', legendRectSize + legendSpacing)
+                    .attr('y', legendRectSize - legendSpacing)
+                    .text(function(d) { return d; });
+            
+            
+            

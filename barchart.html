@@ -39,6 +39,8 @@
 <script src="libraries/d3.js" charset="utf-8"></script>
 <script src="libraries/d3.min.js"></script>
 <script>
+    
+    
 
 var margin = {top: 20, right: 20, bottom: 30, left: 40},
     width = 960 - margin.left - margin.right,
@@ -85,15 +87,18 @@ d3.csv("LKA_data.csv", total, function(error, data) {
   svg.append("g")
       .attr("class", "x axis")
       .attr("transform", "translate(0," + height + ")")
-      .call(xAxis);
+     // .attr("transform","rotate(10)")
+      .call(xAxis)
+     
+      
 
   svg.append("g")
       .attr("class", "y axis")
       .call(yAxis)
-    .append("text")
+      .append("text")
       .attr("transform", "rotate(-90)")
-      .attr("y", 6)
-      .attr("dy", ".71em")
+      .attr("y",10)
+      .attr("dy", ".95em")
       .style("text-anchor", "end")
       .text("Population");
       
@@ -101,7 +106,7 @@ d3.csv("LKA_data.csv", total, function(error, data) {
 
   svg.selectAll(".bar")
       .data(data)
-    .enter().append("rect")
+      .enter().append("rect")
       .attr("class", "bar")
       .attr("x", function(d) { return x(d.District); })
       .attr("width", x.rangeBand())
