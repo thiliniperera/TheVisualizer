@@ -7,10 +7,22 @@
     <script src="libraries/d3.js" charset="utf-8"></script>
     <script src="libraries/d3.min.js"></script>
     
+    <style>
+        .subunit-label {
+            fill: #0000;
+            fill-opacity: .9;
+            font-size: 10px;
+            font-weight: 300;
+            text-anchor: middle;
+            }
+    </style>
+    
    
   </head>
   <body>
     <script type="text/javascript">
+        
+    var metric;
       
     var fillcolor ;
     var strokecolor;
@@ -18,6 +30,7 @@
     var opacity;
     
     var dataset;
+    var geojsonFile;
     var file;
     
     
@@ -26,6 +39,7 @@
     var path;
     var scale;
      var width = 1000,height = 1000;
+     var headerNames;
      
      
     
@@ -50,6 +64,35 @@
                     });
      }
      
+     function loadMetrics(){
+         
+         console.log(headerNames);
+         
+          d3.select("#selectmetric")
+                 .selectAll("options")
+                 .data(headerNames)
+                 .enter()
+                 .append("option")
+                 .attr("value", function(d){ return d })
+                 .text(function(d) {
+			d = d[0].toUpperCase() +
+				d.substring(1,3) + "" + 
+					d.substring(3);
+			return d
+			});
+         
+     }
+     
+     
+     
+     
+     function selectMetric(){        
+         
+         var obj = document.getElementById("selectmetric");   
+         metric = obj.options[obj.selectedIndex].text;
+         
+          loadVisualization(); 
+     }
     
      
     function loadFile(){
@@ -63,13 +106,18 @@
             console.log(error);
         }else{   
             dataset = data;
-            loadVisualization();            
+            headerNames = d3.keys(dataset[0]);
+            loadMetrics();
+                      
         }
     });
     }else{
         alert("dispaly error msg, invalid input");
         
     }
+    
+     
+    
     
     }
 
@@ -81,25 +129,29 @@ function loadVisualization(){
       shp("shapefiles/LKA_adm.zip").then(function(geoJson) {
             
             //merging csv data with geojson data
+            geojsonFile = geoJson[1];
+            
+           // console.log(geojsonFile);
+             
             
             for(var i=0;i<dataset.length;i++){
                 //iterate through each district in data file
-                var districtName = dataset[i].District;
+                var districtName = dataset[i][headerNames[0]];
+                
                 
                 //Grab data value, and convert from string to float
-                var dataValue = parseFloat(dataset[i].Value);
-                
+                var dataValue = parseFloat(dataset[i][metric]);               
                 
                                 
                 //Get the corresponding district from geoJson file
                 
-                for(var j=0;j<geoJson[1].features.length;j++){
+                for(var j=0;j<geojsonFile.features.length;j++){
                     
-                    var geoDistrict = geoJson[1].features[j].properties.NAME_1;
+                    var geoDistrict = geojsonFile.features[j].properties.NAME_1;
                     
                     if(geoDistrict == districtName){
                         //assign a new variable to geojson object containing data value                         
-                        geoJson[1].features[j].properties.Value = dataValue;
+                        geojsonFile.features[j].properties.Value = dataValue;
                         
                     }                   
                   
@@ -126,21 +178,33 @@ function loadVisualization(){
                 .attr("height", height);
 
             svg.selectAll("path")
-                    .data(geoJson[1].features)
+                    .data(geojsonFile.features)
                     .enter()
                     .append("path")
                     .attr("d", path)
                     .attr("stroke",strokecolor)
                     .attr("stroke-width",strokewidth)
-                    .attr("opacity",opacity)
+                    .attr("opacity",opacity)                  
                     .style("fill",function(d){
                         // get the data value
                        var val = d.properties.Value;
                        var col = getColour(val);
                       // console.log(col);
                         return col;
-                
-                    });
+                    })                  
+                   ;
+            
+        //adding the csv value to the 
+           svg.selectAll(".subunit-label")
+              .data(geojsonFile.features)
+                .enter().append("text")
+                .attr("class", function(d) { return "subunit-label " + d.id; })
+                .attr("transform", function(d) { return "translate(" + path.centroid(d) + ")"; })
+                .attr("dy", ".35em")
+                .text(function(d) { return d.properties.NAME_1+"\n"+d.properties.Value; });
+            
+                   
+                    
         });
         
         
@@ -149,6 +213,15 @@ function loadVisualization(){
         
 
 }
+
+
+
+function highlight(){
+    
+}
+
+
+
 
 function getColour(value){
     
@@ -219,11 +292,21 @@ function min(){
     </script>
     <h1>The Visuvalizer</h1>
     
+    
+    
+     
+     
+     
+     <br><br>
+    
     <input type="file" id="myFile" name="files[]" />
             
-     <button onclick="loadFile()">Upload</button>
+     <button id="upload" onclick="loadFile()">Upload</button>
 
-
+     <br><br>
+     
+     <select id="selectmetric"></select>
+     <button id="metric" onclick="selectMetric()">Select</button>
 
     
            <form name="Map Properties">
