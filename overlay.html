@@ -15,6 +15,13 @@
             font-weight: 300;
             text-anchor: middle;
             }
+            
+        info {
+            position: absolute;
+            left: 1000px;
+            top: 10px;
+            z-index: -1;
+            }
     </style>
     
    
@@ -66,7 +73,7 @@
      
      function loadMetrics(){
          
-         console.log(headerNames);
+        
          
           d3.select("#selectmetric")
                  .selectAll("options")
@@ -131,7 +138,7 @@ function loadVisualization(){
             //merging csv data with geojson data
             geojsonFile = geoJson[1];
             
-           // console.log(geojsonFile);
+           
              
             
             for(var i=0;i<dataset.length;i++){
@@ -184,12 +191,20 @@ function loadVisualization(){
                     .attr("d", path)
                     .attr("stroke",strokecolor)
                     .attr("stroke-width",strokewidth)
-                    .attr("opacity",opacity)                  
+                    .attr("opacity",opacity)
+                    .on("mouseover", function(){
+                        d3.select(this).style("fill", "#FFFF00");
+                        })
+                    .on("mouseout",function(d){
+                         var val = d.properties.Value;
+                         var col = getColour(val);
+                        d3.select(this).style("fill",col);
+                        })
                     .style("fill",function(d){
                         // get the data value
                        var val = d.properties.Value;
                        var col = getColour(val);
-                      // console.log(col);
+                      
                         return col;
                     })                  
                    ;
@@ -216,9 +231,7 @@ function loadVisualization(){
 
 
 
-function highlight(){
-    
-}
+
 
 
 
@@ -266,7 +279,7 @@ function max(){
                    max =d.properties.Value;
                } 
             });
-    //console.log("max "+max);
+   
     return max;
 }
 
@@ -280,7 +293,7 @@ function min(){
                    min =d.properties.Value;
                } 
             });
-   // console.log("min "+min);
+   
     return min;
 }
 
@@ -328,6 +341,10 @@ function min(){
            <div id="map" align="center" ></div>
             </form>
            
+     <div id="info">
+         
+         <p>This is info</p>
+     </div>
     
     
   </body>
