@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<html>
+    <head>
+        <title>QUnit Tests</title>
+        <link rel="stylesheet" href="libraries/qunit-1.18.0.css">
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        <script src="ColorMapper.js"></script>
+        <script src="libraries/qunit-1.18.0.js"></script>
+        
+        <script>
+            
+           function rgba(r, g, b,a){
+
+      r = Math.floor(r);
+      g = Math.floor(g);
+      b = Math.floor(b);
+      return ["rgba(",r,",",g,",",b,",",a,")"].join("");
+    }
+
+            
+            function getOppositeColour(color){
+                
+                //converting the colour into respective components and substracting by 255 to get the opposite colour
+                var colorsOnly = color.substring(color.indexOf('(') + 1, color.lastIndexOf(')')).split(/,\s*/),
+                red = 255-colorsOnly[0],
+                green =255- colorsOnly[1],
+                blue = 255-colorsOnly[2],
+                opacity = 1; //opacity doesn't change
+
+                return rgba(red,green,blue,opacity);
+        
+            }
+            
+            
+            QUnit.test( "a basic test example", function( assert ) {
+              var value = "hello";
+              assert.equal( value, "hello", "We expect value to be hello" );
+            });
+
+            QUnit.test( "Test Opposite Color", function( assert ) {
+              var value = "rgba(65,125,177,1)";
+              assert.equal( getOppositeColour("rgba(190,130,78,0.1)"),value, "Opposite colour of #BE824E is #417DB1" );
+            });
+    
+        </script>
+        
+        
+    </head>
+    <body>
+        
+        
+       <div id="qunit"></div>
+        <div id="qunit-fixture"></div>
+
+   
+  
+    </body>
+</html>

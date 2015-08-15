@@ -6,13 +6,13 @@
 
 
     
- function loadbarchart(dataset){  
+ function loadbarchart(dataset,svgbarchart){  
      
 var headerNames = d3.keys(dataset[0]);
 
 var margin = {top: 20, right: 20, bottom: 30, left: 40},
-    width = 500- margin.left - margin.right,
-    height = 500 - margin.top - margin.bottom;
+    width = 100- margin.left - margin.right,
+    height = 100 - margin.top - margin.bottom;
 
 //get the suitable scale for x axis
 var x = d3.scale.ordinal()
@@ -22,8 +22,7 @@ var x = d3.scale.ordinal()
     
 
 //suitable scale for y axis
-var y = d3.scale.linear()
-    .range([height, 0]);
+var y = d3.scale.linear().range([height, 0]);
     
 //create x axis
 var xAxis = d3.svg.axis()
@@ -36,7 +35,7 @@ var yAxis = d3.svg.axis()
     .orient("left");
     
 
-var svg = d3.select("body").append("svg")
+svgbarchart = d3.select("barchart")
     .attr("width", width + margin.left + margin.right)
     .attr("height", height + margin.top + margin.bottom)
     .append("g")
@@ -86,5 +85,6 @@ function total(d) {
   return d;
 }
 
+    return svg;
  }
 

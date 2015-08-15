@@ -6,22 +6,88 @@
     <script src="libraries/topojson.js"></script>
     <script src="libraries/d3.js" charset="utf-8"></script>
     <script src="libraries/d3.min.js"></script>
+    <script src="ColorMapper.js"></script>
+    <script src="barchartloader.js"></script>
+  
     
     <style>
-        .subunit-label {
-            fill: #0000;
-            fill-opacity: .9;
-            font-size: 10px;
-            font-weight: 300;
-            text-anchor: middle;
+        
+                .black_overlay{
+                display: none;
+                position: absolute;
+                top: 0%;
+                left: 0%;
+                width: 100%;
+                height: 100%;
+                background-color: black;
+                z-index:1001;
+                -moz-opacity: 0.8;
+                opacity:.80;
+                filter: alpha(opacity=80);
+}
+
+            .white_content {
+                    display: none;
+                    position: absolute;
+                    top: 10%;
+                    left: 10%;
+                    width: 80%;
+                    height: 80%;
+                    padding: 16px;
+                    border: 10px solid blue;
+                    background-color: white;
+                    z-index:1002;
+                    overflow: auto;
             }
-            
-        #info {
-            position: absolute;
+        
+         #barchart {
+             position: absolute;
             left: 1000px;
-            top: 300px;
-            z-index: -1;
+            top: 350px;
+                width: 300px;
+                height: 275px; 
+                background-color:rgba(68,136,187,.2);
+          }
+         .bar {
+            fill:red;
+          }
+
+          .bar:hover {
+            fill: brown;
+          }
+        #map-editor{
+                 position: absolute;
+                left: 1000px;
+                top: 50px;
+         
+                width: 300px;
+                height: 300px; 
+                background-color:rgba(68,136,187,1);
+            
+        }
+        
+            
+        
+            
+            #map{
+                position: fixed;
+                width: 100%;
+                height: 100%;
+                left: 0;
+                top: 0;
+                background: rgba(51,51,51,0.1);
+                z-index: -1;
             }
+            .tooltip{ background-color:rgba(68,136,187,0.6);
+                margin: 10px;
+                height: 50px;
+                width: 150px;
+                padding-left: 10px; 
+                padding-top: 10px;
+                -webkit-border-radius:10px;
+                -moz-border-radius:10px;
+                border-radius:10px;
+        }
     </style>
     
    
@@ -29,11 +95,17 @@
   <body>
     <script type="text/javascript">
         
+        var infoContainer;
+    var circle;   
+     var data = [ 5, 10, 15, 20, 25 ];
+        
+        
+        
     var metric;
       
     var fillcolor ;
     var strokecolor;
-    var strokewidth=3;
+    var strokewidth;
     var opacity;
     
     var zoom;
@@ -50,7 +122,47 @@
     var scale;
      var width = 1000,height = 1000;
      var headerNames;
+     var barchart;
      
+     
+     var tooltipDiv;
+     var bodyNode = d3.select('body').node();
+     
+     function exportAsHTML(){
+         
+         
+       var html = d3.select("svg")
+        .attr("title", "test2")
+        .attr("version", 1.1)
+        .attr("xmlns", "http://www.w3.org/2000/svg")
+        .node().parentNode.innerHTML;
+
+        document.getElementById("downloadwindow").style.display='inline';
+
+    d3.select("#downloadwindow").append("div")
+        .attr("id", "download")
+        .style("top", event.clientY+20+"px")
+        .style("left", event.clientX+"px")
+        .html("Right-click on this preview and choose Save as<br />Left-Click to dismiss<br />")
+        .append("img")
+        .attr("src", "data:image/svg+xml;base64,"+ btoa(html));
+
+    d3.select("#download")
+        .on("click", function(){
+            if(event.button == 0){  //left mouse
+                d3.select(this).transition()
+                    .style("opacity", 0)
+                    .remove();
+            document.getElementById("downloadwindow").style.display='none';
+            
+            }
+        })
+        .transition()
+        .duration(100)
+        .style("opacity", 1);
+
+      
+     }
     
      
     function setMapProperties(){
@@ -83,25 +195,37 @@
                  .append("option")
                  .attr("value", function(d){ return d })
                  .text(function(d) {
+                     
+                     if(d === headerNames[0]){
+                         
+                     }else{
 			d = d[0].toUpperCase() +
 				d.substring(1,3) + "" + 
 					d.substring(3);
 			return d
-			});
-         
+			
+                    } });
      }  
      
      function selectMetric(){        
          
          var obj = document.getElementById("selectmetric");   
          metric = obj.options[obj.selectedIndex].text;
-         
+         console.log(metric);
           loadVisualization(); 
      }    
      
     function loadFile(){
         
+        
+        
+        
+        
      file = document.getElementById('myFile').files[0];
+     
+     
+     
+     
     if (file) {
     d3.csv(file.name,function(error,data){
         //asynchronous method, rest of your code is executed even while JavaScript is simultaneously waiting for the file to finish downloading into the browser.
@@ -115,6 +239,8 @@
                       
         }
     });
+    //disable the upload button
+    document.getElementById("upload").disabled = true;
     }else{
         alert("dispaly error msg, invalid input");
         
@@ -133,10 +259,7 @@
           shp("shapefiles/LKA_adm.zip").then(function(geoJson) {
 
                 //merging csv data with geojson data
-                geojsonFile = geoJson[1];
-
-
-
+                geojsonFile = geoJson[1];      
 
                 for(var i=0;i<dataset.length;i++){
                     //iterate through each district in data file
@@ -164,6 +287,13 @@
                 }        
 
 
+                
+
+
+
+
+
+                  
                  //create the svg element 
 
 
@@ -178,16 +308,26 @@
                 path = d3.geo.path()
                     .projection(projection);
             
-                
-
+              
+            //Make an SVG Container to include the barchart
+            infoContainer = d3.select('#barchart').append("p")
+                                     .attr("width", 300)
+                                    .attr("height", 300);
+   
+                    circle = infoContainer.append("p");
 
                  svg = d3.select('#map').append("svg")
                     .attr("width", width)
                     .attr("height", height)
                     ;
                     
-                  g = svg.append("g");
+                   
+                                    
+                                         
 
+                  g = svg.append("g");
+                  
+                  
                 g.selectAll("path")
                         .data(geojsonFile.features)
                         .enter()
@@ -196,31 +336,56 @@
                         .attr("stroke",strokecolor)
                         .attr("stroke-width",strokewidth)
                         .attr("opacity",opacity)
-                        .on("mouseover", function(){
-                            d3.select(this).style("fill", "#FFFF00");
+                        .on("mouseover", function(d){
+                            
+                            var val = d.properties.Value;
+                             var col = getOppositeColour(getColour(val));
+                            d3.select(this).style("fill",col);
+                            
+                           //remove previous tooltip
+                            d3.select('body').selectAll('div.tooltip').remove();
+                            // Append tooltip
+                            tooltipDiv = d3.select('body').append('div').attr('class', 'tooltip');
+                            var absoluteMousePos = d3.mouse(bodyNode);
+                            tooltipDiv.style('left', (absoluteMousePos[0] + 10)+'px')
+                                .style('top', (absoluteMousePos[1] - 15)+'px')
+                                .style('position', 'absolute') 
+                                .style('z-index', 1001);
+                            // Add text 
+                           if(d.properties.Value === undefined){
+                               tooltipDiv.html(d.properties.NAME_1+"<br/>"+"unavailable");
+                           }else{
+                            tooltipDiv.html(d.properties.NAME_1+"<br/>"+d.properties.Value);
+                        }
                             })
                         .on("mouseout",function(d){
                              var val = d.properties.Value;
                              var col = getColour(val);
                             d3.select(this).style("fill",col);
+                            
+                            // Remove tooltip
+                            tooltipDiv.remove();
+                            
                             })
-                        .on("click",function(d){                       
-                            d3.select("#info").html(d.properties.NAME_1+"\n"+d.properties.Value);
-
-                            })
+                                               
                         .style("fill",function(d){
                             // get the data value
                            var val = d.properties.Value;
                            var col = getColour(val);
 
                             return col;
-                        }) 
+                        })
+                        .on("click",function(d){
+                            
+                            loadbarchart();
+                           
+                                                                      ;
+                                    
+                        })                   
                        ;
-                     
-
-            //adding the csv value to the 
-            
-            lbl =  svg.selectAll(".subunit-label")
+                       
+               //adding csv value to the map
+          /*   lbl =  svg.selectAll(".subunit-label")
                   .data(geojsonFile.features)
                     .enter().append("text")
                     .attr("class", function(d) { return "subunit-label " + d.id; })
@@ -234,15 +399,18 @@
                         else{
                              return d.properties.NAME_1+"\n"+d.properties.Value;
                         }
-                    });
+                    });    
+
+           */
             
+            
+            //zooming and panning
             
             zoom = d3.behavior.zoom()   //creates event listeners
                     .on("zoom",function() {
                 g.attr("transform","translate("+ 
                     d3.event.translate.join(",")+")scale("+d3.event.scale+")");
-                g.selectAll("path")  
-                    .attr("d", path.projection(projection)); 
+               
                 
                 });
 
@@ -250,85 +418,29 @@
 
 
 
+            
             });
 
 
 
 
 
-
     }
-    
-    function addLabels(){
-        
-        
+   
+   function loadbarchart(){
          
         
-    }
+               circle.style("fill",function() {
+                        return "hsl(" + Math.random() * 360 + ",100%,50%)";
+                        })
+                       .html(function(d){
+                           
+                          return "abcd";
+                           
+               });
+     }
     
     
-    
-    
-    function getColour(value){
-
-
-        //get colour method is called multiple times
-        if(value === undefined){
-           //the default color will be displayed
-           return "#424242" ;
-        }else{
-
-             var val = (value- min())/(max()-min());
-            if(fillcolor === undefined){
-                //return blue color as the default color
-                return rgba(0,0,153,val);
-            }else{        
-             //converting hex fill col to decimal         
-             var r =parseInt((fillcolor).substring(1,3).toString(16),16);  
-             var g =parseInt((fillcolor).substring(3,5).toString(16),16);  
-             var b =parseInt((fillcolor).substring(5,7).toString(16),16);  
-
-            return rgba(r,g,b,val);
-            }
-        }
-
-    }
-
-    function rgba(r, g, b,a){
-
-      r = Math.floor(r);
-      g = Math.floor(g);
-      b = Math.floor(b);
-      return ["rgba(",r,",",g,",",b,",",a,")"].join("");
-    }
-
-    function max(){
-        //return the max value of the data set
-        var max = -Infinity;
-
-       d3.selectAll("path")
-               .each(function(d){
-                   if(max < d.properties.Value){
-                       max =d.properties.Value;
-                   } 
-                });
-
-        return max;
-    }
-
-    function min(){
-        //return the min value of the dataset
-       var min = Infinity;
-
-       d3.selectAll("path")
-               .each(function(d){
-                   if(min> d.properties.Value){
-                       min =d.properties.Value;
-                   } 
-                });
-
-        return min;
-    }
 
     
     
@@ -341,7 +453,7 @@
     
     
      
-     
+      <div id="map-editor">
      
      <br><br>
     
@@ -354,35 +466,38 @@
      <select id="selectmetric"></select>
      <button id="metric" onclick="selectMetric()">Select</button>
 
-    
-           <form name="Map Properties">
+     <br>
+           
            Fill Color:
-           <input type="color" id="fillcol" >
+           <input type="color" id="fillcol" ><br/>
            Opacity :
-           <input type="range" id="opacit" min=0 max=1 step=0.1 default=0.8>
-           Stroke Color:
-           <input type="color" id="strokecol">
-           Stroke Width:
-           <input type="number" id="strokewid" >
+           <input type="range" id="opacit" min=0 max=1 step=0.1 default=0.8><br/>
+           Border Color:
+           <input type="color" id="strokecol"><br/>
+           Border Width:
+           <input type="number" id="strokewid" ><br/>
            <div id="option">
             <input name="updateButton" 
                  type="button" 
                 value="Update" 
-                onclick="setMapProperties()" />
+                onclick="setMapProperties()" /><br/>
             </div>
            
-           <button id="zoom" onclick="addLabels()">Labels</button>
+          
     
            
-           <div id="map" align="center" ></div>
-            </form>
-           
-     <div id="info">
-         
-         <p></p>
-         
-         
-     </div>
+          
+            
+             <br/>
+     
+            <button id="export" onclick="exportAsHTML()">Export</button>
+      </div>
+          
+            
+            <div id="downloadwindow" align="center" display="none" class="white_content"></div>
+            
+            <div id="map" align="center" ></div>
+            <div id="barchart"><p></p></div>
     
      
   </body>
