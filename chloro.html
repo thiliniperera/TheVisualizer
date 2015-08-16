@@ -10,94 +10,16 @@
     <script src="barchartloader.js"></script>
   
     
-    <style>
-        
-                .black_overlay{
-                display: none;
-                position: absolute;
-                top: 0%;
-                left: 0%;
-                width: 100%;
-                height: 100%;
-                background-color: black;
-                z-index:1001;
-                -moz-opacity: 0.8;
-                opacity:.80;
-                filter: alpha(opacity=80);
-}
-
-            .white_content {
-                    display: none;
-                    position: absolute;
-                    top: 10%;
-                    left: 10%;
-                    width: 80%;
-                    height: 80%;
-                    padding: 16px;
-                    border: 10px solid blue;
-                    background-color: white;
-                    z-index:1002;
-                    overflow: auto;
-            }
-        
-         #barchart {
-             position: absolute;
-            left: 1000px;
-            top: 350px;
-                width: 300px;
-                height: 275px; 
-                background-color:rgba(68,136,187,.2);
-          }
-         .bar {
-            fill:red;
-          }
-
-          .bar:hover {
-            fill: brown;
-          }
-        #map-editor{
-                 position: absolute;
-                left: 1000px;
-                top: 50px;
-         
-                width: 300px;
-                height: 300px; 
-                background-color:rgba(68,136,187,1);
-            
-        }
-        
-            
-        
-            
-            #map{
-                position: fixed;
-                width: 100%;
-                height: 100%;
-                left: 0;
-                top: 0;
-                background: rgba(51,51,51,0.1);
-                z-index: -1;
-            }
-            .tooltip{ background-color:rgba(68,136,187,0.6);
-                margin: 10px;
-                height: 50px;
-                width: 150px;
-                padding-left: 10px; 
-                padding-top: 10px;
-                -webkit-border-radius:10px;
-                -moz-border-radius:10px;
-                border-radius:10px;
-        }
-    </style>
+   <link rel="stylesheet" type="text/css" href="css/chloro.css">
     
    
   </head>
   <body>
     <script type="text/javascript">
         
-        var infoContainer;
+    var infoContainer;
     var circle;   
-     var data = [ 5, 10, 15, 20, 25 ];
+     
         
         
         
@@ -185,9 +107,6 @@
      }
      
      function loadMetrics(){
-         
-        
-         
           d3.select("#selectmetric")
                  .selectAll("options")
                  .data(headerNames)
@@ -215,23 +134,68 @@
           loadVisualization(); 
      }    
      
-    function loadFile(){
-        
-        
-        
-        
-        
-     file = document.getElementById('myFile').files[0];
+     
+     function getShpFilePath(){
+         
+         d3.select("#shpInput")
+                 .append("input")
+                .attr("type", "file")
+                .attr("accept", ".zip")
+                .style("margin", "5px")
+                .on("change", function() {
+                  var file = d3.event.target.files[0];
+                  if (file) {
+                    var reader = new FileReader();
+                      reader.onloadend = function(evt) {
+                        var dataUrl = evt.target.result;
+                        // The following call results in an "Access denied" error in IE.
+                        return dataUrl;
+                    };
+                   reader.readAsDataURL(file);
+                  }
+               });
+         
+         
+         
+    }
      
      
      
      
-    if (file) {
-    d3.csv(file.name,function(error,data){
+     function getCSVFilePath(){
+                d3.select("#csvInput")
+                        .append("input")
+                .attr("type", "file")
+                .attr("accept", ".csv")
+                .style("margin", "5px")
+                .on("change", function() {
+                  var file = d3.event.target.files[0];
+                  if (file) {
+                    var reader = new FileReader();
+                      reader.onloadend = function(evt) {
+                        var dataUrl = evt.target.result;
+                        // The following call results in an "Access denied" error in IE.
+                        loadCSVFile(dataUrl);
+                    };
+                   reader.readAsDataURL(file);
+                  }
+               });
+            }
+            
+   
+       
+    
+     
+    function loadCSVFile(csvUrl){
+      
+      
+      //alert(file.url);
+   
+    d3.csv(csvUrl,function(error,data){
         //asynchronous method, rest of your code is executed even while JavaScript is simultaneously waiting for the file to finish downloading into the browser.
                
         if(error){
-            console.log(error);
+          //  console.log(error);
         }else{   
             dataset = data;
             headerNames = d3.keys(dataset[0]);
@@ -241,23 +205,19 @@
     });
     //disable the upload button
     document.getElementById("upload").disabled = true;
-    }else{
-        alert("dispaly error msg, invalid input");
-        
     }
     
-     
     
-    
-    }
 
     function loadVisualization(){
 
-
+    console.log("Visualizing started");
+    
+ // var path = getShpFilePath();
 
             //converting file to geoJson 
           shp("shapefiles/LKA_adm.zip").then(function(geoJson) {
-
+              
                 //merging csv data with geojson data
                 geojsonFile = geoJson[1];      
 
@@ -290,7 +250,7 @@
                 
 
 
-
+              
 
 
                   
@@ -298,15 +258,33 @@
 
 
 
-                scale = 5000;
+                
 
-                projection = d3.geo.mercator()
-                    .center([81,6.5]) //replace with the centroid
-                    .scale(scale)    //scale and translate should be adjusted as suitable
-                    .translate([width/2,height/2]);
-
-                path = d3.geo.path()
-                    .projection(projection);
+              //project the map on a flat surface using guesses
+             projection = d3.geo.mercator()                       
+                .scale(1)
+                .translate([0, 0]);
+        
+            //geographic path generator(translate coordinates to pixels on the canvas)
+             path = d3.geo.path()
+                .projection(projection);
+        
+        console.log("width "+width);
+                console.log("height "+height);
+        
+        // using the path determine the bounds of the current map and use 
+             // these to determine better values for the scale and translation
+            var b = path.bounds(geojsonFile),
+                s = .5 / Math.max((b[1][0] - b[0][0]) / width, (b[1][1] - b[0][1]) / height),
+                 //scaled the bounding box to 95% of the canvas, rather than 100%, so there’s a little extra room on the edges for strokes and surrounding features or padding.
+                t = [(width - s * (b[1][0] + b[0][0])) / 2, (height - s * (b[1][1] + b[0][1])) / 2.3];
+                
+                console.log("scale "+s);
+                console.log("translate "+t);
+            // new projection
+              projection = d3.geo.mercator()
+                             .scale(s).translate(t);
+               path = path.projection(projection);
             
               
             //Make an SVG Container to include the barchart
@@ -315,15 +293,14 @@
                                     .attr("height", 300);
    
                     circle = infoContainer.append("p");
-
-                 svg = d3.select('#map').append("svg")
+                    
+              //creating the canvas to hold the map
+             svg = d3.select('#map').append("svg")
                     .attr("width", width)
                     .attr("height", height)
                     ;
                     
-                   
-                                    
-                                         
+                         
 
                   g = svg.append("g");
                   
@@ -378,7 +355,7 @@
                         .on("click",function(d){
                             
                             loadbarchart();
-                           
+                          
                                                                       ;
                                     
                         })                   
@@ -408,6 +385,8 @@
             
             zoom = d3.behavior.zoom()   //creates event listeners
                     .on("zoom",function() {
+                        removeLabels();
+                        document.getElementById("label").checked = false;
                 g.attr("transform","translate("+ 
                     d3.event.translate.join(",")+")scale("+d3.event.scale+")");
                
@@ -425,6 +404,44 @@
 
 
 
+    }
+    
+    
+    function addLabels(){
+        
+        lbl =  g.selectAll(".subunit-label")
+                  .data(geojsonFile.features)
+                    .enter().append("text")
+                    .attr("class", function(d) { return "subunit-label " + d.id; })
+                    .attr("transform", function(d) { return "translate(" + path.centroid(d) + ")"; })
+                    .attr("dy", ".35em")
+                    .text(function(d) { 
+                        
+                        if(d.properties.Value === undefined){
+                            return d.properties.NAME_1;
+                         }
+                        else{
+                             return d.properties.NAME_1+"\n"+d.properties.Value;
+                        }
+                    });  
+        
+    }
+    
+    function removeLabels(){
+        
+        lbl.remove();
+        
+    }
+    
+    function handleLabelCheck(){
+        
+        var checkbox = document.getElementById("label");
+        
+         if(checkbox.checked){
+           addLabels();
+        }else{
+            removeLabels();
+        }
     }
    
    function loadbarchart(){
@@ -450,16 +467,20 @@
     </script>
     <h1>The Visuvalizer</h1>
     
-    
+    <div id="shpInput"> </div>
+            
+     <button id="uploadShp" onclick="getShpFilePath()">Upload Shapefile</button>
+     
+     <input id="label"  type="checkbox" onclick="handleLabelCheck()" />Labels
     
      
       <div id="map-editor">
      
      <br><br>
     
-    <input type="file" id="myFile" name="files[]" />
+     <div id="csvInput"> </div>
             
-     <button id="upload" onclick="loadFile()">Upload</button>
+     <button id="upload" onclick="getCSVFilePath()">Upload CSV</button>
 
      <br><br>
      
@@ -471,7 +492,7 @@
            Fill Color:
            <input type="color" id="fillcol" ><br/>
            Opacity :
-           <input type="range" id="opacit" min=0 max=1 step=0.1 default=0.8><br/>
+           <input type="range" id="opacit" min=0 max=1 step=0.1><br/>
            Border Color:
            <input type="color" id="strokecol"><br/>
            Border Width:
@@ -497,6 +518,7 @@
             <div id="downloadwindow" align="center" display="none" class="white_content"></div>
             
             <div id="map" align="center" ></div>
+            <div id="preview" align="center" ></div>
             <div id="barchart"><p></p></div>
     
      

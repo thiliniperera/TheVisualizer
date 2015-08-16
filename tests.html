@@ -13,6 +13,7 @@ and open the template in the editor.
         
         <script src="ColorMapper.js"></script>
         <script src="libraries/qunit-1.18.0.js"></script>
+        <script src="chloro.html"></script>
         
         <script>
             
@@ -23,7 +24,12 @@ and open the template in the editor.
       b = Math.floor(b);
       return ["rgba(",r,",",g,",",b,",",a,")"].join("");
     }
-
+            
+           
+            
+            
+            
+            
             
             function getOppositeColour(color){
                 
@@ -38,6 +44,11 @@ and open the template in the editor.
         
             }
             
+             QUnit.test( "Loading csv file", function( assert ) {
+              var value = "C:\Users\Ruchira\Desktop\data.csv";
+              assert.equal( getFilePath(), value, "We expect the name of the file to be this" );
+            });
+            
             
             QUnit.test( "a basic test example", function( assert ) {
               var value = "hello";
@@ -45,6 +56,11 @@ and open the template in the editor.
             });
 
             QUnit.test( "Test Opposite Color", function( assert ) {
+              var value = "rgba(65,125,177,1)";
+              assert.equal( getOppositeColour("rgba(190,130,78,0.1)"),value, "Opposite colour of #BE824E is #417DB1" );
+            });
+            
+            QUnit.test( "Handle Next Option of the index page", function( assert ) {
               var value = "rgba(65,125,177,1)";
               assert.equal( getOppositeColour("rgba(190,130,78,0.1)"),value, "Opposite colour of #BE824E is #417DB1" );
             });
@@ -58,6 +74,8 @@ and open the template in the editor.
         
        <div id="qunit"></div>
         <div id="qunit-fixture"></div>
+        
+        <input type="file" id="myFile" name="files[]" />
 
    
   
