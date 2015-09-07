@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<html>
+    <head>
+        <title>Colotr Test</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+         <script src="libraries/d3.js" charset="utf-8"></script>
+      
+    </head>
+    <body>
+          <script>
+              
+             var fillcolor ="#088A08";
+             
+                var r =parseInt((fillcolor).substring(1,3).toString(16),16);  
+             var g =parseInt((fillcolor).substring(3,5).toString(16),16);  
+             var b =parseInt((fillcolor).substring(5,7).toString(16),16);  
+            
+             var h =rgbToHue(r,g,b);
+                console.log(h);
+                
+                
+          var svgWidth  = 1000,  svgHeight = 1000;
+          
+           var svg = d3.select("body").append("svg")
+              .attr("width", svgWidth)
+              .attr("height", svgHeight);
+      
+     
+      
+           svg.append("circle")
+                .attr("cx", 100)
+                .attr("cy", 100)
+                .attr("r", 20)
+                 .style("fill",fillcolor);
+        
+         svg.append("circle")
+                .attr("cx", 150)
+                .attr("cy", 100)
+                .attr("r", 20)
+                 .style("fill", function() { 
+                     
+               
+                var col = "hsl("+h+",100%,75%)";
+                
+                return col;
+            });
+            
+            
+             svg.append("circle")
+                .attr("cx", 200)
+                .attr("cy", 100)
+                .attr("r", 20)
+                 .style("fill", function() { 
+                var col = "hsl("+h+",100%,50%)";
+                
+                return col;
+            });
+             svg.append("circle")
+                .attr("cx", 250)
+                .attr("cy", 100)
+                .attr("r", 20)
+                 .style("fill", function() { 
+                     
+              
+                var col = "hsl("+h+",100%,25%)";
+                
+                return col;
+            });
+            
+             svg.append("circle")
+                .attr("cx", 300)
+                .attr("cy", 100)
+                .attr("r", 20)
+                 .style("fill", function() { 
+                     
+                var col = "hsl("+h+",100%,0%)";
+                
+                return col;
+            });
+      
+        //------------------------------
+      
+      function rgbToHue(r, g, b){
+          //convert rgb values to the range of 0-1
+      var h;
+      r /= 255, g /= 255, b /= 255;
+        
+        //find min and max values out of r,g,b components
+        var max = Math.max(r, g, b), min = Math.min(r, g, b);
+        
+        if(max == r){
+            //if red is the predominent color
+            h = (g-b)/(max-min);
+        }
+       else if(max == g){
+            //if green is the predominent color
+            h = 2 +(b-r)/(max-min);
+        }
+        else if(max == b){
+            //if blue is the predominent color
+            h = 4 + (r-g)/(max-min);
+        }
+        
+        h = h*60; //find the sector of 60 degrees to which the color belongs
+        //https://www.pathofexile.com/forum/view-thread/1246208/page/45 - hsl color wheel
+        
+        if(h >0){
+            return Math.floor(h);
+        }
+        else{
+            return Math.floor(360 -h);
+        }
+     
+}
+        </script>
+       
+    </body>
+</html>

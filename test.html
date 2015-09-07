@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<html>
+    <head>
+        <title>The Visualizer:Categorical Chloropleth</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script src="libraries/shp.js"></script>
+        <script src="libraries/topojson.js"></script>
+        <script src="libraries/d3.js" charset="utf-8"></script>
+        <script src="libraries/d3.min.js"></script>
+        <script src="js/jquery-1.11.3.min.js"></script>
+         <script src="js/test.js"></script>
+         <script src="js/materialize.min.js"></script>
+          <script src="js/FileLoader.js"></script>
+          <script src="js/geoCalculator.js"></script>
+          <script src="js/exporter.js"></script>
+          <script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
+            <script src="http://maps.googleapis.com/maps/api/js"></script>
+            
+            <script>
+                
+              
+            </script>
+            <style>
+                
+                                legend {
+                     padding: 1.5em 0 0 1.5em;
+                 }
+
+                 li.key {
+                     border-top-width: 15px;
+                     border-top-style: solid;
+                     font-size: .75em;
+                     width: 10%;
+                     padding-left: 0;
+                     padding-right: 0;
+                }
+                
+                
+                tooltip{ background-color:#000;
+                      color: #FBEFEF;
+                text-decoration-color: #FFF;
+                margin: 10px;
+                height: 50px;
+                width: 150px;
+                padding-left: 10px; 
+                padding-top: 10px;
+                -webkit-border-radius:10px;
+                -moz-border-radius:10px;
+                border-radius:10px;
+        }
+            </style>
+         
+        
+        <link rel="stylesheet" type="text/css" href="css/test.css">
+   
+    
+         
+    </head>
+    <body>
+        
+        
+        
+<div class="navbar-fixed">
+    <nav>
+      <div class="nav-wrapper">
+        <a href="#!" class="brand-logo">The Visualizer</a>
+        <ul class="right hide-on-med-and-down">
+          <li><a href="sass.html">About</a></li>
+          <li><a href="badges.html">Help</a></li>
+        </ul>
+      </div>
+    </nav>
+  </div>
+        <br>
+            
+         
+    
+         <div id="map-editor"  >
+             
+              <input type="file" id="fileInput" >Data
+                <button type="button" onclick="loadCSV()" >Upload</button>
+                <br><br>
+             
+                  <input type="File" id="shpFileInput">Shape file
+                <button type="button" onclick="shpload()" >Upload</button>
+                <br><br>
+                
+                <select id="selectcategory"></select>
+                <button id="category" onclick="selectCategory(); return false;">Select</button>
+                <br><br>
+             
+             
+             
+          Opacity :
+           <input type="range" id="opacit" min=0 max=1 step=0.1><br/>
+           Border Color:
+           <input type="color" id="strokecol"><br/>
+           Border Width:
+           <input type="number" id="strokewid" ><br/>           
+            <input name="updateButton" 
+                 type="button" 
+                value="Update" 
+                onclick="setMapProperties()"><br/>
+            <br>
+            
+            <button id="export" onclick="exportAsHTML()">Export</button>  
+            
+            
+            <br><br><br>
+            
+             <div id="colorsetter" align="center" style="display:none" >
+             
+        <input type="checkbox" id="defaultcol">Use default Colours<br>
+        
+        <input id="submitcolours" type="submit" onclick="setCategoryColours(); return false;">
+            </div>
+            
+            
+         </div>
+          
+            <div id="downloadwindow" class="white_content"></div>
+            
+            
+        
+        
+           <div id="googlemap"></div>
+           
+            <div id="legend"></div>
+        
+        
+    </body>
+</html>

@@ -1,0 +1,414 @@
+/* 
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+
+ 
+ var display;
+ var dataset;
+ var shapefile;
+ var metric;
+ var headerNames;
+ var category;
+ var keys = [];
+ var svg;
+ var tooltipDiv;
+ 
+ var colorset = ["#8dd3c7","#ffffb3","#bebada","#fb8072","#80b1d3","#fdb462","#b3de69","#fccde5","#d9d9d9","#bc80bd","#ccebc5","#ffed6f"];
+ 
+ 
+ 
+ 
+ var shpfile;
+ var csvfile;
+ var layer;
+ var g;
+ 
+ var projection;
+ var path;
+ var width=1000;
+ var height=1000;
+ 
+ var gm_path;
+ var gm_d3_map;
+    var legend,svgLegend;
+ 
+   var legendRectSize = 18;                                  // NEW
+        var legendSpacing = 4;  
+ 
+  var tooltipDiv;
+     var bodyNode = d3.select('body').node();
+     
+     var color = d3.scale.ordinal();  
+     
+     function LoadLegendFromInput(){
+         
+          svgLegend.append("circle")
+                         .attr("cx", 20)
+                        .attr("cy", 20)
+                      .attr("r", 10)
+                      .style("fill",color);
+         
+     }
+     
+      
+     
+     function loadLegendFromScheme(){
+         
+      
+                                
+           
+ 
+                    svgLegend.append("circle")
+                         .attr("cx", 20)
+                        .attr("cy", 20)
+                      .attr("r", 10)
+                      .style("fill","hsl(350, 100%, 75%)");
+   
+ 
+                    
+     }
+     
+     
+     
+      function initialise(){
+          
+              
+                    
+                     
+                    
+                
+                // Create the Google Map…
+                 map = new google.maps.Map(d3.select("#googlemap").node(), {
+                    
+                  zoom: 11,
+                  center: new google.maps.LatLng(7,81),
+                  mapTypeId: google.maps.MapTypeId.TERRAIN,
+                  
+                 styles:[{"stylers": [{"saturation": -5},{"lightness": 75}]}]           
+                
+                  
+                  
+                });
+                
+                map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push(
+                                        document.getElementById('legend'));
+                                
+                                 legend = d3.select('#legend')
+                            .append("g")
+                            .selectAll("g")
+                            .data(color.domain())
+                            .enter()
+                            .append('g')
+                              .attr('class', 'legend')
+                              ;
+    
+ 
+              svgLegend = legend.append("svg")
+                                     .attr("width", 20)
+                                    .attr("height", 35);
+                            
+                              legend.append('text')
+                            .attr('x', legendRectSize + legendSpacing)
+                            .attr('y', legendRectSize - legendSpacing)
+                            .text(function(d) { return d; });
+                                
+                                loadLegendFromScheme();
+            
+                
+              map.setZoom(8);
+                overlay = new google.maps.OverlayView();
+                
+                overlay.onAdd =  function (){
+                   console.log("overlayadd_start");
+                  layer = d3.select(this.getPanes().overlayMouseTarget)
+                        .append('div') 
+                        .append('svg')
+                        .attr('width', 1000)
+                        .attr('height', 1000)  ;
+                        
+                
+                   g = layer.append("g");
+                
+                overlay.draw = function(){
+                    console.log("overlaydraw_start");
+              
+                        gm_projection = overlay.getProjection();
+
+                        gm_path = d3.geo.path().projection(gm_d3_map_proj);
+                        
+                        
+                    
+                        
+                         gm_d3_map= g.selectAll("path")
+                               .data(shapefile.features)
+                               .attr("d",gm_path)
+                               .enter().append("svg:path")
+                               .attr("d",gm_path)
+                               .style("fill",function(d){
+                                     // get the data value
+                                    var val = d.properties.Value;
+                                   // var col = getColourOrdinal(val);
+                                     return  color(val);
+                                 })
+                                 .on("mouseover", function(d){
+                                    console.log("mouseOver");
+                                    //remove previous tooltip
+                                     d3.select('body').selectAll('div.tooltip').remove();
+                                     // Append tooltip
+                                     tooltipDiv = d3.select('body').append('div').attr('class', 'tooltip');
+                                     var absoluteMousePos = d3.mouse(this);
+                                     tooltipDiv.style('left', (absoluteMousePos[0] + 10)+'px')
+                                         .style('top', (absoluteMousePos[1] +10)+'px')
+                                         .style('position', 'absolute') 
+                                         .style('z-index', 1001);
+                                     // Add text to tooltip
+                                    if(d.properties.Value === undefined){
+                                        tooltipDiv.html(d.properties.NAME_1+"<br/>"+"unavailable");
+                                    }else{
+                                     tooltipDiv.html(d.properties.NAME_1+"<br/>"+d.properties.Value);
+                                     }
+                            })
+                            .on("mouseout",function(d){
+                            // Remove tooltip
+                            tooltipDiv.remove();
+                            
+                            })
+                                        
+                       ;
+                   
+
+
+                       console.log("overlaydraw_end");
+                       
+                       
+                        function gm_d3_map_proj(coordinates){
+                                var google_coordinates = new google.maps.LatLng(coordinates[1],coordinates[0]);
+                                var pixel_coordinates = gm_projection.fromLatLngToDivPixel(google_coordinates);
+
+                                return [pixel_coordinates.x,pixel_coordinates.y];
+
+                }
+                
+                console.log("overlayadd_end");
+               };      
+          };
+               
+                
+              overlay.setMap(map);  
+              
+              
+                
+                }
+               
+                
+          
+     
+ function setMapProperties(){
+         
+      var  strokecolor =document.getElementById('strokecol').value;
+       var  strokewidth = document.getElementById('strokewid').value;        
+       var opacity = document.getElementById('opacit').value;
+        
+        g.attr("stroke",strokecolor)
+            .attr("stroke-width",strokewidth)
+            .attr("opacity",opacity);
+     }
+     
+ 
+  function loadVisualization(){
+      
+      console.log("Visualizing started");
+      
+    
+    projection = d3.geo.mercator()                       
+                .scale(1)
+                .translate([0, 0]);
+        
+            //geographic path generator(translate coordinates to pixels on the canvas)
+             path = d3.geo.path()
+                .projection(projection);
+        
+     /*   
+        
+        // using the path determine the bounds of the current map and use 
+             // these to determine better values for the scale and translation
+           
+              var  s = .5 / Math.max((b[1][0] - b[0][0]) / width, (b[1][1] - b[0][1]) / height),
+                 //scaled the bounding box to 95% of the canvas, rather than 100%, so there’s a little extra room on the edges for strokes and surrounding features or padding.
+                t = [(width - s * (b[1][0] + b[0][0])) / 2, (height - s * (b[1][1] + b[0][1])) / 2.3];
+                
+                console.log("scale "+s);
+                console.log("translate "+t);*/
+        var b = path.bounds(shapefile);
+            
+            var center = [(b[1][0]+b[0][0])/2, (b[1][1]+b[0][1])/2];
+            
+            console.log(center);
+      
+  /*          var map_centre = new google.maps.Point;
+            map_centre.x=Math.floor(center[0]);
+            map_centre.y=Math.floor(center[1]);
+            
+             //convert the pixel values to lat and lng
+                        var _center =  projection.fromContainerPixelToLatLng(map_centre);
+                       //the the centre of the google map to be the centroid of the shapefile
+                        map.setCenter(_center);
+
+   
+    */
+    initialise();
+    
+    }
+ 
+  function loadCategory(){
+      if(dataset === undefined){          
+          //if no data has been uploaded prompt a message and disable the next button          
+          alert("dataset undefined");
+          
+      }else{     
+          d3.select("#selectcategory")
+                 .selectAll("options")
+                 .data(headerNames)
+                 .enter()
+                 .append("option")
+                 .attr("value", function(d){ return d })
+                 .text(function(d) {                     
+                     if(d === headerNames[0]){                         
+                     }else{
+			d = d[0].toUpperCase() +
+				d.substring(1,3) + "" + 
+					d.substring(3);
+			return d;
+			} });
+      }
+     }  
+     
+    
+     
+     function selectCategory(){      
+         var obj = document.getElementById("selectcategory");   
+         category = obj.options[obj.selectedIndex].text;
+         console.log(category);
+         
+         mapData();
+         loadVisualization();
+      
+     }  
+ 
+ function mapData(){
+     
+       for(var i=0;i<dataset.length;i++){
+                    //iterate through each district in data file
+                    var subunitName = dataset[i][metric];
+                  
+
+                 
+                    //Grab data value, and convert from string to float
+                    var dataValue = (dataset[i][category]);               
+
+                   
+                    //Get the corresponding district from geoJson file
+
+                    for(var j=0;j<shapefile.features.length;j++){
+
+                        var geoDistrict = shapefile.features[j].properties.NAME_1;
+                        
+
+                        if(geoDistrict == subunitName){
+                           
+                            //assign a new variable to geojson object containing data value                         
+                            shapefile.features[j].properties.Value = dataValue;
+                          
+                          
+                          //if the array keys doesn't contain the value add it
+                          if(keys.indexOf(dataValue) == -1) {
+                              keys.push(dataValue);
+                          }
+                        }                   
+
+
+                    }
+                }  
+               // console.log("keys "+keys);
+     //set the distinct values in the selected metric of the data as the domain for the color function
+     color.domain(keys);
+     
+     
+         //create a color palatte for each type of data
+       d3.select("#colorsetter").selectAll("p")
+            .data(keys)
+            .enter().append("label")
+            .text(function(d) { return d; })
+            .append("input")            
+            .attr("type", "color")
+            
+            .attr("id", function(d,i) { return i; })            
+            ;
+            
+           
+    //set  colorsetter visible
+     document.getElementById('colorsetter').style.display = 'inline';
+     for(var i=0; i<keys.length;i++){
+         if(i>=colorset.length){
+             document.getElementById(i).value = colorset[i-colorset.length]; //colors are repeated
+         }else{
+         document.getElementById(i).value = colorset[i]; // assign the colors when no color is repeated
+        }
+     }
+     
+ }
+ function submitInitialValues(){
+     
+   //default colours 
+   color.range( colorset);
+   loadCategory();
+     
+     
+ }
+ 
+ 
+ function setCategoryColours(){
+     
+     
+     
+   if(document.getElementById('defaultcol').checked){
+        
+     //document.getElementById('defaultcol').disabled = document.getElementById('defaultcol').disabled ? false : true;
+     color.range(colorset);
+     loadLegendFromScheme();
+     }else{
+     
+         
+      var col=[];
+         var i;
+         for(i=0;i<keys.length;i++){
+             col.push(document.getElementById(i).value);
+             console.log(document.getElementById(i).value);
+         }
+        
+         color.range(col);
+      
+      LoadLegendFromInput();
+     }
+     
+     
+     changeRegionColours();
+     
+ }
+ 
+ function changeRegionColours(){
+                     g.selectAll("path")
+                             .style("fill",function(d){
+                                     // get the data value
+                                    var val = d.properties.Value;
+                                   // var col = getColourOrdinal(val);
+                                     return  color(val);
+                                 });
+ }
+ 
+ 
+
+
+

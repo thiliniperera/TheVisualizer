@@ -1,10 +1,3 @@
-/* 
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
-
 
         
     var infoContainer;
@@ -32,10 +25,16 @@
     var projection;
     var path;
     var scale;
-     var width = 1000,height = 1000;
+    
      var headerNames;
      var barchart;
      
+     var w = window,
+    d = document,
+    e = d.documentElement,
+    g = d.getElementsByTagName('body')[0],
+    x = w.innerWidth || e.clientWidth || g.clientWidth,
+    y = w.innerHeight|| e.clientHeight|| g.clientHeight;
      
      var tooltipDiv;
      var bodyNode = d3.select('body').node();
@@ -125,6 +124,33 @@
      }    
      
      
+     function getShpFilePath(){
+         
+         d3.select("#shpInput")
+                 .append("input")
+                .attr("type", "file")
+                .attr("accept", ".zip")
+                .style("margin", "5px")
+                .on("change", function() {
+                  var file = d3.event.target.files[0];
+                  if (file) {
+                    var reader = new FileReader();
+                      reader.onloadend = function(evt) {
+                        var dataUrl = evt.target.result;
+                        // The following call results in an "Access denied" error in IE.
+                        return dataUrl;
+                    };
+                   reader.readAsDataURL(file);
+                  }
+               });
+         
+         
+         
+    }
+     
+     
+     
+     
      function getCSVFilePath(){
                 d3.select("#csvInput")
                         .append("input")
@@ -175,6 +201,8 @@
     function loadVisualization(){
 
     console.log("Visualizing started");
+    
+ // var path = getShpFilePath();
 
             //converting file to geoJson 
           shp("shapefiles/LKA_adm.zip").then(function(geoJson) {
@@ -257,8 +285,8 @@
                     
               //creating the canvas to hold the map
              svg = d3.select('#map').append("svg")
-                    .attr("width", width)
-                    .attr("height", height)
+                    .attr("width", x)
+                    .attr("height", y)
                     ;
                     
                          
@@ -287,7 +315,7 @@
                             var absoluteMousePos = d3.mouse(bodyNode);
                             tooltipDiv.style('left', (absoluteMousePos[0] + 10)+'px')
                                 .style('top', (absoluteMousePos[1] - 15)+'px')
-                                .style('position', 'absolute') 
+                                .style('position', 'relative') 
                                 .style('z-index', 1001);
                             // Add text 
                            if(d.properties.Value === undefined){
@@ -316,7 +344,7 @@
                         .on("click",function(d){
                             
                             loadbarchart();
-                           
+                          
                                                                       ;
                                     
                         })                   
@@ -346,6 +374,8 @@
             
             zoom = d3.behavior.zoom()   //creates event listeners
                     .on("zoom",function() {
+                        removeLabels();
+                        document.getElementById("label").checked = false;
                 g.attr("transform","translate("+ 
                     d3.event.translate.join(",")+")scale("+d3.event.scale+")");
                
@@ -363,6 +393,44 @@
 
 
 
+    }
+    
+    
+    function addLabels(){
+        
+        lbl =  g.selectAll(".subunit-label")
+                  .data(geojsonFile.features)
+                    .enter().append("text")
+                    .attr("class", function(d) { return "subunit-label " + d.id; })
+                    .attr("transform", function(d) { return "translate(" + path.centroid(d) + ")"; })
+                    .attr("dy", ".35em")
+                    .text(function(d) { 
+                        
+                        if(d.properties.Value === undefined){
+                            return d.properties.NAME_1;
+                         }
+                        else{
+                             return d.properties.NAME_1+"\n"+d.properties.Value;
+                        }
+                    });  
+        
+    }
+    
+    function removeLabels(){
+        
+        lbl.remove();
+        
+    }
+    
+    function handleLabelCheck(){
+        
+        var checkbox = document.getElementById("label");
+        
+         if(checkbox.checked){
+           addLabels();
+        }else{
+            removeLabels();
+        }
     }
    
    function loadbarchart(){
@@ -385,4 +453,4 @@
 
    
 
-  
+   

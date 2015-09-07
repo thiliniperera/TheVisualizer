@@ -10,13 +10,16 @@ and open the template in the editor.
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <script src="js/index.js"></script>
+        <script src="js/materialize.min.js"></script>
+        
+        <link rel="stylesheet" type="text/css" href="css/materialize.css">
     </head>
     <body>
         <h1>The Visualizer</h1>
         
         <span id="Step4" style="display:inline-table">
 
-            <table border="0" cellpadding="5" cellspacing="0">
+            <table class="hoverable" border="0" cellpadding="5" cellspacing="0">
 
                 <tr>
 
@@ -29,9 +32,6 @@ and open the template in the editor.
                 </tr>
 
                 <tr>
-
-                  
-
                     <td align="left">
                     <input type="radio" id="chloro"  value="1"> Basic Chloropleth
                     </td>
@@ -39,7 +39,6 @@ and open the template in the editor.
                 </tr>
 
                 <tr>
-
                     <td align="left">
                     <input type="radio" id="categorychloro"  value="2"> Categorized Chloropleth
                     </td>
@@ -59,17 +58,9 @@ and open the template in the editor.
         <table border="0" cellpadding="5" cellspacing="0">
 
             <tr>
-
-                
-
                 <td>
-
                     <input id="ButtonNext" type="button" value="Next" name="Step2" onclick="handleNext()" /></td>
-
-                
-
             </tr>
-
         </table>
         
         

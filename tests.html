@@ -10,39 +10,12 @@ and open the template in the editor.
         <link rel="stylesheet" href="libraries/qunit-1.18.0.css">
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        
+        <script src="js/jquery-1.11.3.min.js"></script>
         <script src="ColorMapper.js"></script>
         <script src="libraries/qunit-1.18.0.js"></script>
         <script src="chloro.html"></script>
         
         <script>
-            
-           function rgba(r, g, b,a){
-
-      r = Math.floor(r);
-      g = Math.floor(g);
-      b = Math.floor(b);
-      return ["rgba(",r,",",g,",",b,",",a,")"].join("");
-    }
-            
-           
-            
-            
-            
-            
-            
-            function getOppositeColour(color){
-                
-                //converting the colour into respective components and substracting by 255 to get the opposite colour
-                var colorsOnly = color.substring(color.indexOf('(') + 1, color.lastIndexOf(')')).split(/,\s*/),
-                red = 255-colorsOnly[0],
-                green =255- colorsOnly[1],
-                blue = 255-colorsOnly[2],
-                opacity = 1; //opacity doesn't change
-
-                return rgba(red,green,blue,opacity);
-        
-            }
             
              QUnit.test( "Loading csv file", function( assert ) {
               var value = "C:\Users\Ruchira\Desktop\data.csv";

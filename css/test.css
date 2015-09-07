@@ -1,0 +1,129 @@
+/*
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+*/
+/* 
+    Created on : Aug 16, 2015, 10:05:36 PM
+    Author     : Thilini
+*/
+
+
+        
+                .black_overlay{
+                display: none;
+                position: absolute;
+                top: 0%;
+                left: 0%;
+                width: 100%;
+                height: 100%;
+                background-color: black;
+                z-index:1001;
+                -moz-opacity: 0.8;
+                opacity:.80;
+                filter: alpha(opacity=80);
+}
+
+            .white_content {
+                    display: none;
+                    position: absolute;
+                    top: 10%;
+                    left: 10%;
+                    width: 80%;
+                    height: 80%;
+                    padding: 16px;
+                    border: 10px solid blue;
+                    background-color: white;
+                    z-index:1002;
+                    overflow: auto;
+            }
+        
+         #barchart {
+             position: absolute;
+            left: 1000px;
+            top: 350px;
+                width: 300px;
+                height: 275px; 
+                background-color:rgba(68,136,187,.2);
+          }
+         .bar {
+            fill:red;
+          }
+
+          .bar:hover {
+            fill: brown;
+          }
+          #map-editor{
+                 position: absolute;
+                right:10px;
+                top: 10px;
+                width: 300px;
+                height: 100%; 
+                background-color:rgba(68,136,187,1);
+                padding: 10px;
+            
+        }
+        
+       .legend {
+    font-size: 12px;
+    width : 50 px;
+    height : 50px;
+  }
+  rect {
+    stroke-width: 2;
+  }
+        
+            
+        
+            
+            #map{
+                position: fixed;
+                width: 1000px;
+                height: 1000px;
+                left: 0;               
+                background: rgba(51,51,51,0.1);
+                z-index: -1;
+                opacity: 0.4;
+                
+                
+                
+                
+                
+            }
+            
+            #googlemap{
+                z-index: 0;
+                left: 10px;
+                right: 330px; 
+                opacity:1;
+                height:100%;
+                position: absolute;
+                top: 0px;
+            }
+                    .legend {                                                   /* NEW */
+                font-size: 12px;                                          /* NEW */
+              }                                                           /* NEW */
+            rect {                                                      /* NEW */
+              stroke-width: 2;                                          /* NEW */
+            }       
+            #googlemap2{
+                z-index: 0;
+                position: fixed;
+                width: 1000px;
+                height: 1000px;
+                
+                
+            }
+            .tooltip{ background-color:#000;
+                      color: #FBEFEF;
+                text-decoration-color: #FFF;
+                margin: 10px;
+                height: 50px;
+                width: 150px;
+                padding-left: 10px; 
+                padding-top: 10px;
+                -webkit-border-radius:10px;
+                -moz-border-radius:10px;
+                border-radius:10px;
+        }
+    
