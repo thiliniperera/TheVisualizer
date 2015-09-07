@@ -53,6 +53,13 @@ and open the template in the editor.
           .bar:hover {
             fill: brown;
           }
+          .mapsvg{
+              position: absolute;
+                top: -4000px;
+                left: -4000px;
+                width: 8000px;
+                height: 8000px; 
+          }
           #map-editor{
                  position: absolute;
                 right:10px;

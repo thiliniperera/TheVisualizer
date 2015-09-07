@@ -64,8 +64,11 @@
      var bodyNode = d3.select('body').node();
      
      function gmapload() {
+         
+         //load the google map to the browser         
+         
             var mapProp = {
-              center:new google.maps.LatLng(7,81),
+              center:new google.maps.LatLng(0,0),
               zoom:5,
                zoomControl:true,
                 zoomControlOptions: {
@@ -77,43 +80,7 @@
           }
          
      
-     function exportAsHTML(){
-         
-         
-       var html = d3.select("svg")
-        .attr("title", "test2")
-        .attr("version", 1.1)
-        .attr("xmlns", "http://www.w3.org/2000/svg")
-        .node().parentNode.innerHTML;
-
-        document.getElementById("downloadwindow").style.display='inline';
-
-    d3.select("#downloadwindow").append("div")
-        .attr("id", "download")
-        .style("top", event.clientY+20+"px")
-        .style("left", event.clientX+"px")
-        .html("Right-click on this preview and choose Save as<br />Left-Click to dismiss<br />")
-        .append("img")
-        .attr("src", "data:image/svg+xml;base64,"+ btoa(html));
-
-    d3.select("#download")
-        .on("click", function(){
-            if(event.button == 0){  //left mouse
-                d3.select(this).transition()
-                    .style("opacity", 0)
-                    .remove();
-            document.getElementById("downloadwindow").style.display='none';
-            
-            }
-        })
-        .transition()
-        .duration(100)
-        .style("opacity", 1);
-
-      
-     }
-    
-     
+  
     function setMapProperties(){
          
         strokecolor =document.getElementById('strokecol').value;
@@ -217,12 +184,9 @@
 
     console.log("Visualizing started");
     
-            mapData();
-            
+            mapData();            
             gmapload();
             
-          
-                  
                  //create the svg element 
 
                overlay = new google.maps.OverlayView();
@@ -235,14 +199,14 @@
                         .append('div') 
                         .append("id","mapContainer")
                         .append('svg')
-                        .attr('width', 1000)
-                        .attr('height', 1000) 
-                        .style("fill","#0B1907");
+                        .attr('width', 2000)
+                        .attr('height', 2000) 
+                        ;
 
                   g = layer.append("g");
                   
                   overlay.draw = function(){
-                      removeLabels();
+                      
                       
                     console.log("overlaydraw_start");
               
@@ -311,9 +275,7 @@
              };
 
             
-               overlay.onRemove = function(){
-                   console.log("remove");
-               }   ;
+               
               
                        
               overlay.setMap(map); 
@@ -364,7 +326,7 @@
     
      
       <div id="map-editor" align="left">
-     
+     <button id="new" onclick=" location.reload()">New</button>
         <br><br>
      
             <div id="shpInput">

@@ -55,6 +55,7 @@
      
      function loadLegendFromScheme(){
          
+         
                     svgLegend.append("circle")
                          .attr("cx", 20)
                         .attr("cy", 20)
@@ -66,87 +67,76 @@
      
       function initialise(){
                 // Create the Google Map…
-                 map = new google.maps.Map(d3.select("#googlemap").node(), {
-                    
-                  zoom: 1,
-                  center: new google.maps.LatLng(0,0),
-                  mapTypeId: google.maps.MapTypeId.TERRAIN,
-                  
-                          
+     map = new google.maps.Map(d3.select("#googlemap").node(), {
+                     center: new google.maps.LatLng(0,0),
+                     zoom: 7,
+                     zoomControl: true,
+                     zoomControlOptions: {
+                         style: google.maps.ZoomControlStyle.SMALL
+                     },
+                     mapTypeId: google.maps.MapTypeId.ROADMAP
+                 });
                 
-                  
-                  
-                });
-                
-                map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push(
-                                        document.getElementById('legend'));
-                                
-                                 legend = d3.select('#legend')
-                            .append("g")
-                            .selectAll("g")
-                            .data(color.domain())
-                            .enter()
-                            .append('g')
-                              .attr('class', 'legend')
-                              ;
-    
- 
-              svgLegend = legend.append("svg")
-                                     .attr("width", 20)
-                                    .attr("height", 35);
-                            
-                              legend.append('text')
-                            .attr('x', legendRectSize + legendSpacing)
-                            .attr('y', legendRectSize - legendSpacing)
-                            .text(function(d) { return d; });
-                                
-                                loadLegendFromScheme();
+    //add legend to the right bottom of gmap
+    map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push(document.getElementById('legend'));
+             
+      //--add legend ------------
+    legend = d3.select('#legend').append("g").selectAll("g").data(color.domain())
+      .enter().append('g').attr('class', 'legend');
+      
+      
+    svgLegend = legend.append("svg").attr("width", 20).attr("height", 35);
+  
+    legend.append('text').attr('x', legendRectSize + legendSpacing).attr('y',
+      legendRectSize - legendSpacing).text(function(d) {
+      return d;
+    });
+  
+    loadLegendFromScheme();
             
                 
-              map.setZoom(8);
+              
                 overlay = new google.maps.OverlayView();
+                
                 
                 overlay.onAdd =  function (){
                    console.log("overlayadd_start");
                   layer = d3.select(this.getPanes().overlayMouseTarget)
                         .append('div') 
                         .append('svg')
+                        .attr('class','mapsvg')
                         .attr('width', 1000)
                         .attr('height', 1000)  ;
-                        
+     
                 
                    g = layer.append("g");
                    
-                   var gm_projection = overlay.getProjection();
-       
-        
-                    var gm_path = d3.geo.path().projection(function (coordinates){
-                  
-                    var google_coordinates = new google.maps.LatLng(coordinates[1],coordinates[0]);
-                    var pixel_coordinates = gm_projection.fromLatLngToDivPixel(google_coordinates);
-                               
-
-                                return [pixel_coordinates.x,pixel_coordinates.y];
-
-                }
-                  
-                  );
-          
-           var b = gm_path.bounds(shapefile);
-           
-           //scale           
-          var  s = (1 / Math.max((b[1][0] - b[0][0]) / width, (b[1][1] - b[0][1]) / height));
-          console.log(s);
-          
-            var center = [Math.floor((b[1][0]+b[0][0])/2), Math.floor((b[1][1]+b[0][1])/2)];
-                // console.log(center);
-                 
-           var _center =  gm_projection.fromContainerPixelToLatLng(new google.maps.Point(center[0],center[1]));
-              
-              
-            //console.log(_center);
-          //  map.panTo(_center);
-          // map.setZoom(Math.floor(s*5.3));
+                   
+                   
+                     //---gettting the initial center, scale
+                   
+                                gm_projection = overlay.getProjection();
+              gm_path = d3.geo.path().projection(function(coordinates) {
+                  var google_coordinates = new google.maps.LatLng(coordinates[1],
+                      coordinates[0]);
+                  var pixel_coordinates = gm_projection.fromLatLngToDivPixel(
+                      google_coordinates);
+                  return [pixel_coordinates.x, pixel_coordinates.y];
+              });
+              var b = gm_path.bounds(shapefile);
+               //scale           
+              var s = (1 / Math.max((b[1][0] - b[0][0]) / width, (b[1][1] - b[0][1]) /
+                  height));
+              console.log(s);
+              var center = [Math.floor((b[1][0] + b[0][0]) / 2), Math.floor((b[1][1] + b[0]
+                  [1]) / 2)];
+               // console.log(center);
+              var _center = gm_projection.fromContainerPixelToLatLng(new google.maps.Point(
+                  center[0], center[1]));
+                   
+                   
+              map.panTo(_center);
+                map.setZoom(s*5);
                 
                 overlay.draw = function(){
                     console.log("overlaydraw_start");
@@ -172,14 +162,14 @@
                                      return  color(val);
                                  })
                                  .on("mouseover", function(d){
-                                    console.log("mouseOver");
+                                   console.log("mouseover");
                                     //remove previous tooltip
                                      d3.select('body').selectAll('div.tooltip').remove();
                                      // Append tooltip
                                      tooltipDiv = d3.select('body').append('div').attr('class', 'tooltip');
                                      var absoluteMousePos = d3.mouse(this);
-                                     tooltipDiv.style('left', (absoluteMousePos[0] + 10)+'px')
-                                         .style('top', (absoluteMousePos[1] +10)+'px')
+                                     tooltipDiv.style('left', (absoluteMousePos[0])-4000+'px')
+                                         .style('top', (absoluteMousePos[1])-4000+'px')
                                          .style('position', 'absolute') 
                                          .style('z-index', 1001);
                                      // Add text to tooltip
@@ -206,7 +196,7 @@
                                 var google_coordinates = new google.maps.LatLng(coordinates[1],coordinates[0]);
                                 var pixel_coordinates = gm_projection.fromLatLngToDivPixel(google_coordinates);
 
-                                return [pixel_coordinates.x,pixel_coordinates.y];
+                                return [pixel_coordinates.x+4000,pixel_coordinates.y+4000];
 
                 }
                 console.log("overlaydraw_end");
@@ -219,8 +209,8 @@
         
           
             console.log("end of visual");
-           map.panTo(new google.maps.LatLng(7,81));
-            map.setZoom(7); 
+         //  map.panTo(new google.maps.LatLng(7,81));
+          //  map.setZoom(7); 
               overlay.setMap(map);  
               
               
