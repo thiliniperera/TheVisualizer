@@ -58,6 +58,7 @@ and open the template in the editor.
          
         
         <link rel="stylesheet" type="text/css" href="css/test.css">
+          <link rel="stylesheet" type="text/css" href="css/styles.css">
    
     
          
@@ -66,20 +67,15 @@ and open the template in the editor.
         
         
         
-<div class="navbar-fixed">
-    <nav>
-      <div class="nav-wrapper">
-        <a href="#!" class="brand-logo">The Visualizer</a>
-        <ul class="right hide-on-med-and-down">
-          <li><a href="sass.html">About</a></li>
-          <li><a href="badges.html">Help</a></li>
-        </ul>
-      </div>
-    </nav>
-  </div>
-        <br>
-            
-         
+            <div id='cssmenu'>
+            <ul>
+               <li><a href='index.html'><span>Home</span></a></li>
+               <li class='active'><a href='#'><span>Chloropleth-Categorical</span></a></li>
+               <li><a href='chloro.html'><span>Chloropleth-Numerical</span></a></li>
+               <li class='last'><a href='help.html'><span>Help</span></a></li>
+            </ul>
+            </div>
+       
     
          <div id="map-editor"  >
              
@@ -112,7 +108,12 @@ and open the template in the editor.
                 onclick="setMapProperties()"><br/>
             <br>
             
-            <button id="export" onclick="exportAsHTML()">Export</button>  
+            <button id="export" onclick="exportAsHTML()">Export As SVG</button>  
+            
+            <button id="exportPNG" onclick="exportAsPNG()">Export As PNG</button>
+            
+            <br><br>
+            <button id="reset" onclick="reset()">Reset</button>
             
             
             <br><br><br>
@@ -129,7 +130,7 @@ and open the template in the editor.
           
             <div id="downloadwindow" class="white_content"></div>
             
-            
+               <div id="downloadwindowImg" align="center"  class="white_content"></div>
         
         
            <div id="googlemap"></div>

@@ -118,7 +118,40 @@ and open the template in the editor.
         }
      
 }
+
+
+//---------------color gradient----------------
+
+    var idGradient = "legendGradient";
+
+    var svgForLegend = d3.select("#legend").append("svg")
+                            .attr("width", 500)
+                            .attr("height", 500);
+                    
+                    
+    svgForLegend.append("g")
+                    .append("defs")
+                    .append("linearGradient")
+                        .attr("id",idGradient)
+                        .attr("x1","0%")
+                        .attr("x2","100%")
+                        .attr("y1","0%")
+                        .attr("y2","0%"); 
+                
+                
+    svgForLegendStuff.append("rect")
+                    .attr("fill","url(#" + idGradient + ")")
+                    .attr("x",x1)
+                    .attr("y",y1)
+                    .attr("width",100)
+                    .attr("height",50);
+                    
+                    
+                    
+                    
+     
         </script>
        
+        <div id="legend"></div>
     </body>
 </html>

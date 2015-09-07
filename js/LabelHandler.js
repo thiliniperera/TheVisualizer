@@ -29,7 +29,7 @@
     
     function removeLabels(){
         console.log("remove lbl chk");
-        lbl.remove();
+        d3.select(".subunit-label").remove();
         
     }
     

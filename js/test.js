@@ -72,7 +72,7 @@
                   center: new google.maps.LatLng(0,0),
                   mapTypeId: google.maps.MapTypeId.TERRAIN,
                   
-                 styles:[{"stylers": [{"saturation": -5},{"lightness": 75}]}]           
+                          
                 
                   
                   
@@ -145,8 +145,8 @@
               
               
             //console.log(_center);
-            map.panTo(_center);
-           map.setZoom(Math.floor(s*5.3));
+          //  map.panTo(_center);
+          // map.setZoom(Math.floor(s*5.3));
                 
                 overlay.draw = function(){
                     console.log("overlaydraw_start");
@@ -164,6 +164,7 @@
                                .attr("d",gm_path)
                                .enter().append("svg:path")
                                .attr("d",gm_path)
+                               .attr("class","svgoverlay")
                                .style("fill",function(d){
                                      // get the data value
                                     var val = d.properties.Value;
@@ -218,8 +219,8 @@
         
           
             console.log("end of visual");
-          //   map.panTo(new google.maps.LatLng(7,81));
-          //  map.setZoom(7); 
+           map.panTo(new google.maps.LatLng(7,81));
+            map.setZoom(7); 
               overlay.setMap(map);  
               
               

@@ -13,6 +13,7 @@
   
     
    <link rel="stylesheet" type="text/css" href="css/chloro.css">
+   <link rel="stylesheet" type="text/css" href="css/styles.css">
     
     
   </head>
@@ -21,6 +22,7 @@
         
     var infoContainer;
     var circle;   
+    
      
         
         
@@ -65,12 +67,13 @@
             var mapProp = {
               center:new google.maps.LatLng(7,81),
               zoom:5,
+               zoomControl:true,
+                zoomControlOptions: {
+                  style:google.maps.ZoomControlStyle.SMALL
+                },
               mapTypeId:google.maps.MapTypeId.ROADMAP
             };
             map=new google.maps.Map(document.getElementById("googlemap"),mapProp);
-            
-            
-            
           }
          
      
@@ -239,6 +242,8 @@
                   g = layer.append("g");
                   
                   overlay.draw = function(){
+                      removeLabels();
+                      
                     console.log("overlaydraw_start");
               
                         gm_projection = overlay.getProjection();
@@ -347,7 +352,15 @@
    
 
     </script>
-    <h1>The Visuvalizer</h1>
+     <div id='cssmenu'>
+            <ul>
+               <li><a href='index.html'><span>Home</span></a></li>
+               <li ><a href='test.html'><span>Chloropleth-Categorical</span></a></li>
+               <li class='active'><a href='#'><span>Chloropleth-Numerical</span></a></li>
+               <li class='last'><a href='help.html'><span>Help</span></a></li>
+            </ul>
+     </div>
+    
     
      
       <div id="map-editor" align="left">
