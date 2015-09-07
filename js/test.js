@@ -25,7 +25,7 @@
  var layer;
  var g;
  
- var projection;
+ var gm_projection;
  var path;
  var width=1000;
  var height=1000;
@@ -34,8 +34,8 @@
  var gm_d3_map;
     var legend,svgLegend;
  
-   var legendRectSize = 18;                                  // NEW
-        var legendSpacing = 4;  
+   var legendRectSize = 18;                                  
+  var legendSpacing = 4;  
  
   var tooltipDiv;
      var bodyNode = d3.select('body').node();
@@ -49,41 +49,27 @@
                         .attr("cy", 20)
                       .attr("r", 10)
                       .style("fill",color);
-         
      }
      
       
      
      function loadLegendFromScheme(){
          
-      
-                                
-           
- 
                     svgLegend.append("circle")
                          .attr("cx", 20)
                         .attr("cy", 20)
                       .attr("r", 10)
-                      .style("fill","hsl(350, 100%, 75%)");
-   
- 
-                    
+                      .style("fill",color);
      }
      
      
      
       function initialise(){
-          
-              
-                    
-                     
-                    
-                
                 // Create the Google Map…
                  map = new google.maps.Map(d3.select("#googlemap").node(), {
                     
-                  zoom: 11,
-                  center: new google.maps.LatLng(7,81),
+                  zoom: 1,
+                  center: new google.maps.LatLng(0,0),
                   mapTypeId: google.maps.MapTypeId.TERRAIN,
                   
                  styles:[{"stylers": [{"saturation": -5},{"lightness": 75}]}]           
@@ -130,6 +116,37 @@
                         
                 
                    g = layer.append("g");
+                   
+                   var gm_projection = overlay.getProjection();
+       
+        
+                    var gm_path = d3.geo.path().projection(function (coordinates){
+                  
+                    var google_coordinates = new google.maps.LatLng(coordinates[1],coordinates[0]);
+                    var pixel_coordinates = gm_projection.fromLatLngToDivPixel(google_coordinates);
+                               
+
+                                return [pixel_coordinates.x,pixel_coordinates.y];
+
+                }
+                  
+                  );
+          
+           var b = gm_path.bounds(shapefile);
+           
+           //scale           
+          var  s = (1 / Math.max((b[1][0] - b[0][0]) / width, (b[1][1] - b[0][1]) / height));
+          console.log(s);
+          
+            var center = [Math.floor((b[1][0]+b[0][0])/2), Math.floor((b[1][1]+b[0][1])/2)];
+                // console.log(center);
+                 
+           var _center =  gm_projection.fromContainerPixelToLatLng(new google.maps.Point(center[0],center[1]));
+              
+              
+            //console.log(_center);
+            map.panTo(_center);
+           map.setZoom(Math.floor(s*5.3));
                 
                 overlay.draw = function(){
                     console.log("overlaydraw_start");
@@ -139,7 +156,8 @@
                         gm_path = d3.geo.path().projection(gm_d3_map_proj);
                         
                         
-                    
+                     // these to determine better values for the scale and translation
+            
                         
                          gm_d3_map= g.selectAll("path")
                                .data(shapefile.features)
@@ -180,7 +198,7 @@
                    
 
 
-                       console.log("overlaydraw_end");
+                       
                        
                        
                         function gm_d3_map_proj(coordinates){
@@ -190,12 +208,18 @@
                                 return [pixel_coordinates.x,pixel_coordinates.y];
 
                 }
-                
-                console.log("overlayadd_end");
-               };      
-          };
+                console.log("overlaydraw_end");
                
-                
+               };  
+                console.log("overlayadd_end");
+          };
+          
+        
+        
+          
+            console.log("end of visual");
+          //   map.panTo(new google.maps.LatLng(7,81));
+          //  map.setZoom(7); 
               overlay.setMap(map);  
               
               
@@ -222,13 +246,13 @@
       console.log("Visualizing started");
       
     
-    projection = d3.geo.mercator()                       
+/*    projection = d3.geo.mercator()                       
                 .scale(1)
                 .translate([0, 0]);
         
             //geographic path generator(translate coordinates to pixels on the canvas)
              path = d3.geo.path()
-                .projection(projection);
+                .projection(projection);*/
         
      /*   
         
@@ -241,11 +265,11 @@
                 
                 console.log("scale "+s);
                 console.log("translate "+t);*/
-        var b = path.bounds(shapefile);
+      /*  var b = path.bounds(shapefile);
             
             var center = [(b[1][0]+b[0][0])/2, (b[1][1]+b[0][1])/2];
             
-            console.log(center);
+            console.log(center);*/
       
   /*          var map_centre = new google.maps.Point;
             map_centre.x=Math.floor(center[0]);
@@ -293,15 +317,17 @@
          console.log(category);
          
          mapData();
-         loadVisualization();
+         
       
      }  
  
  function mapData(){
      
+     //console.log(dataset);
+     
        for(var i=0;i<dataset.length;i++){
                     //iterate through each district in data file
-                    var subunitName = dataset[i][metric];
+                    var subunitName = dataset[i][headerNames[0]];
                   
 
                  
@@ -331,7 +357,7 @@
 
                     }
                 }  
-               // console.log("keys "+keys);
+              //  console.log("keys "+keys);
      //set the distinct values in the selected metric of the data as the domain for the color function
      color.domain(keys);
      
@@ -357,7 +383,7 @@
          document.getElementById(i).value = colorset[i]; // assign the colors when no color is repeated
         }
      }
-     
+     loadVisualization();
  }
  function submitInitialValues(){
      
@@ -385,7 +411,8 @@
          var i;
          for(i=0;i<keys.length;i++){
              col.push(document.getElementById(i).value);
-             console.log(document.getElementById(i).value);
+          
+          //      console.log(document.getElementById(i).value);
          }
         
          color.range(col);

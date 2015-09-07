@@ -39,7 +39,7 @@ reader.readAsArrayBuffer(shpfile);
         }else{   
           dataset = data;
            headerNames = d3.keys(data[0]);
-           // console.log(headerNames);
+            console.log(dataset);
               submitInitialValues();
         }
     });
@@ -50,9 +50,10 @@ reader.readAsArrayBuffer(shpfile);
     
     
 function loadCSV(){
+    
            
 		var fileInput = document.getElementById('fileInput');
-		 display = document.getElementById('fileDisplayArea');
+		 
 
 			csvfile = fileInput.files[0];
                        
