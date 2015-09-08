@@ -28,8 +28,8 @@
     }
     
     function removeLabels(){
-        console.log("remove lbl chk");
-        d3.select(".subunit-label").remove();
+        
+        d3.selectAll(".subunit-label").remove();
         
     }
     

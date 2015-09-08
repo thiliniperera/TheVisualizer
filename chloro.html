@@ -10,11 +10,26 @@
     <script src="js/FileLoaderChloro.js"></script>
     <script src="js/LabelHandler.js"></script>
      <script src="http://maps.googleapis.com/maps/api/js"></script>
+      <script src="http://dimplejs.org/dist/dimple.v2.1.6.min.js"></script>
   
     
    <link rel="stylesheet" type="text/css" href="css/chloro.css">
    <link rel="stylesheet" type="text/css" href="css/styles.css">
-    
+   <style>
+       .mapsvg{
+              position: absolute;
+                top: -4000px;
+                left: -4000px;
+                width: 8000px;
+                height: 8000px; 
+          }
+          
+          .svgoverlay{
+                     height:100%;
+                     left:10px;
+                     right:330px;
+                }
+   </style>
     
   </head>
   <body>
@@ -47,7 +62,7 @@
     var projection;
     var path;
     var scale;
-     var width = 2000,height = 2000;
+     var width = 1000,height = 1000;
      var headerNames;
      var barchart;
      
@@ -68,7 +83,7 @@
          //load the google map to the browser         
          
             var mapProp = {
-              center:new google.maps.LatLng(0,0),
+              center:new google.maps.LatLng(7,81),
               zoom:5,
                zoomControl:true,
                 zoomControlOptions: {
@@ -199,16 +214,49 @@
                         .append('div') 
                         .append("id","mapContainer")
                         .append('svg')
-                        .attr('width', 2000)
-                        .attr('height', 2000) 
+                        .attr('class','mapsvg')
+                        .attr('width', 1000)
+                        .attr('height', 1000) 
                         ;
 
                   g = layer.append("g");
+                  
+                  //---gettting the initial center, scale
+                   
+                                gm_projection = overlay.getProjection();
+              gm_path = d3.geo.path().projection(function(coordinates) {
+                  var google_coordinates = new google.maps.LatLng(coordinates[1],
+                      coordinates[0]);
+                  var pixel_coordinates = gm_projection.fromLatLngToDivPixel(
+                      google_coordinates);
+                  return [pixel_coordinates.x, pixel_coordinates.y];
+              });
+              var b = gm_path.bounds(geojsonFile);
+               //scale           
+            
+              var center = [Math.floor((b[1][0] + b[0][0]) / 2), Math.floor((b[1][1] + b[0]
+                  [1]) / 2)];
+               // console.log(center);
+              var _center = gm_projection.fromContainerPixelToLatLng(new google.maps.Point(
+                  center[0], center[1]));
+                   
+                   
+             // map.panTo(_center);
+              // map.setZoom(0);
+              //  map.setZoom(5);
+                  
+                  
+                  
+                  
+                  
                   
                   overlay.draw = function(){
                       
                       
                     console.log("overlaydraw_start");
+                    
+                    document.getElementById("label").checked = false;
+                    removeLabels();
               
                         gm_projection = overlay.getProjection();
                        
@@ -217,7 +265,7 @@
                                 var google_coordinates = new google.maps.LatLng(coordinates[1],coordinates[0]);
                                 var pixel_coordinates = gm_projection.fromLatLngToDivPixel(google_coordinates);
 
-                                return [pixel_coordinates.x,pixel_coordinates.y];
+                                return [pixel_coordinates.x+4000,pixel_coordinates.y+4000];
 
                         }
 
@@ -229,7 +277,8 @@
                                .data(geojsonFile.features)
                                .attr("d",gm_path)
                                .enter().append("svg:path")
-                               .attr("class","svg")
+                               
+                               .attr("class","svgoverlay")
                                .style("fill",function(d){
                                      // get the data value
                                     var val = d.properties.Value;
@@ -244,8 +293,8 @@
                                      // Append tooltip
                                      tooltipDiv = d3.select('body').append('div').attr('class', 'tooltip');
                                      var absoluteMousePos = d3.mouse(this);
-                                     tooltipDiv.style('left', (absoluteMousePos[0] + 10)+'px')
-                                         .style('top', (absoluteMousePos[1] +10)+'px')
+                                     tooltipDiv.style('left', (absoluteMousePos[0]-4000)+'px')
+                                         .style('top', (absoluteMousePos[1]-4000)+'px')
                                          .style('position', 'absolute') 
                                          .style('z-index', 1001);
                                      // Add text to tooltip
@@ -295,18 +344,25 @@
    
    
    function loadbarchart(){
-         
-        
-               circle.style("fill",function() {
-                        return "hsl(" + Math.random() * 360 + ",100%,50%)";
-                        })
-                       .html(function(d){
-                           
-                          return "abcd";
-                           
-               });
-     }
-    
+     document.getElementById("hover").style.display = 'inline';
+     document.getElementById("barchartWindow").style.display = 'inline';
+     
+    var svg = dimple.newSvg("#barchartWindow", 500, 400);
+     var data = dataset;
+   
+   var chart = new dimple.chart(svg, data);
+    chart.addCategoryAxis("x", headerNames[0]);
+    chart.addMeasureAxis("y", category);
+    chart.addSeries(null, dimple.plot.bar);
+    chart.draw();
+     
+ }
+
+
+function removeBarChart(){
+        document.getElementById("hover").style.display = 'none';
+     document.getElementById("barchartWindow").style.display = 'none';
+	}
     
    
     
@@ -326,7 +382,7 @@
     
      
       <div id="map-editor" align="left">
-                 <button id="new" onclick="location.reload(); return false;">New</button>
+     <button id="new" onclick="location.reload(); return false;">New</button>
                  <button id="reload" onclick="initialise(); return false;">Reset</button>
                   <button id="reload" onclick="loadbarchart(); return false;">Barchart</button>
         <br><br>
@@ -378,7 +434,7 @@
             <button id="exportPNG" onclick="exportAsPNG()">Export As PNG</button>
             
             <br><br>
-            <button id="reset" onclick="reset()">Reset</button>
+            
           
       </div>
           
@@ -386,7 +442,15 @@
             <div id="downloadwindow" align="center" display="none" class="white_content"></div>
              <div id="downloadwindowImg" align="center" display="none" class="white_content"></div>
             
-            
+             <div id="hover" style="display:none"></div>
+
+               <div id="barchartWindow" align="center" style="display:none">
+                   <div id="close" onclick="removeBarChart()">X</div>
+                    
+                   
+                   
+                   
+               </div>
             <div id="googlemap"></div>
             
             

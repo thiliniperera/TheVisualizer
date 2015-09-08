@@ -63,15 +63,22 @@ and open the template in the editor.
                 padding: 10px;
             
         }
-        
-        .legend {
-  font-size: 12px;
-}
-                #svg{
+        .svgoverlay{
                      height:100%;
                      left:10px;
                      right:330px;
                 }
+        
+        .legend {
+  font-size: 12px;
+}
+                .mapsvg{
+              position: absolute;
+                top: -4000px;
+                left: -4000px;
+                width: 8000px;
+                height: 8000px; 
+          }
              
             #googlemap{
                 z-index: 0;
