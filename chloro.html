@@ -326,7 +326,9 @@
     
      
       <div id="map-editor" align="left">
-     <button id="new" onclick=" location.reload()">New</button>
+                 <button id="new" onclick="location.reload(); return false;">New</button>
+                 <button id="reload" onclick="initialise(); return false;">Reset</button>
+                  <button id="reload" onclick="loadbarchart(); return false;">Barchart</button>
         <br><br>
      
             <div id="shpInput">

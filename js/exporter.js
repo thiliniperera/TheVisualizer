@@ -6,8 +6,9 @@
 
  function exportAsHTML(){
          
+         console.log("export AS html");
          
-       var html = d3.select("svg")
+       var html = d3.select("#overlaymap")
         .attr("title", "test2")
         .attr("version", 1.1)
         .attr("xmlns", "http://www.w3.org/2000/svg")
@@ -17,7 +18,7 @@
 
     d3.select("#downloadwindow").append("div")
         .attr("id", "download")
-        .style("top", event.clientY+20+"px")
+        .style("top", event.clientY+"px")
         .style("left", event.clientX+"px")
         .html("Right-click on this preview and choose Save as<br />Left-Click to dismiss<br />")
         .append("img")
@@ -42,15 +43,23 @@
    
 
 function exportAsPNG(){
+    
+    
+     console.log("export AS png");
+    
+    
+    
         // Select the first svg element
         var svg = d3.select("svg")[0][0],
             img = new Image(),
             serializer = new XMLSerializer(),
             svgStr = serializer.serializeToString(svg);
+    
+    console.log(svg);
 
     d3.select("#downloadwindowImg").append("div")
         .attr("id", "text")
-        .style("top", event.clientY+20+"px")
+        .style("top", event.clientY+"px")
         .style("left", event.clientX+"px")
         .html("Right-click on this preview and choose Save as<br />Left-Click to dismiss<br />");
 

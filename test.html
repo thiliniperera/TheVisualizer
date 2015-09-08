@@ -17,10 +17,12 @@ and open the template in the editor.
          <script src="js/test.js"></script>
          <script src="js/materialize.min.js"></script>
           <script src="js/FileLoader.js"></script>
+          <script src="js/LabelHandlerCategory.js"></script>
           <script src="js/geoCalculator.js"></script>
           <script src="js/exporter.js"></script>
           <script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
             <script src="http://maps.googleapis.com/maps/api/js"></script>
+            <script src="http://dimplejs.org/dist/dimple.v2.1.6.min.js"></script>
             
             <script>
                 
@@ -28,33 +30,7 @@ and open the template in the editor.
             </script>
             <style>
                 
-                                legend {
-                     padding: 1.5em 0 0 1.5em;
-                 }
-
-                 li.key {
-                     border-top-width: 15px;
-                     border-top-style: solid;
-                     font-size: .75em;
-                     width: 10%;
-                     padding-left: 0;
-                     padding-right: 0;
-                }
-                
-                
-                tooltip{ background-color:#000;
-                      color: #FBEFEF;
-                text-decoration-color: #FFF;
-                margin: 10px;
-                height: 50px;
-                width: 150px;
-                padding-left: 10px; 
-                padding-top: 10px;
-                -webkit-border-radius:10px;
-                -moz-border-radius:10px;
-                border-radius:10px;
-        }
-        
+               
         
         
         
@@ -85,15 +61,16 @@ and open the template in the editor.
     
          <div id="map-editor"  >
                <button id="new" onclick="location.reload(); return false;">New</button>
-                 <button id="reload" onclick="initialise(); return false;">REload</button>
+                 <button id="reload" onclick="initialise(); return false;">Reset</button>
+                  <button id="reload" onclick="loadbarchart(); return false;">Barchart</button>
              
-            
-             Shapefile
+                  <br><br>
+                  Shapefile<br>
                   <input type="File" id="shpFileInput">
                 <button type="button" onclick="shpload()" >Upload</button>
                 <br><br>
                 
-               Data
+                Data<br>
               <input type="file" id="fileInput" >
                 <button type="button" onclick="loadCSV()" >Upload</button>
                 <br><br>
@@ -120,13 +97,13 @@ and open the template in the editor.
             
             <button id="exportPNG" onclick="exportAsPNG()">Export As PNG</button>
             
-            <br><br>
-            <button id="reset" onclick="reset()">Reset</button>
-            
+             <br><br>
+             <input id="label"  type="checkbox" onclick="handleLabelCheck()">Labels
             
             <br><br><br>
             
              <div id="colorsetter" align="center" style="display:none" >
+                
              
         <input type="checkbox" id="defaultcol">Use default Colours<br>
         
@@ -139,6 +116,16 @@ and open the template in the editor.
             <div id="downloadwindow" class="white_content"></div>
             
                <div id="downloadwindowImg" align="center"  class="white_content"></div>
+               
+               <div id="hover" style="display:none"></div>
+
+               <div id="barchartWindow" align="center" style="display:none">
+                   <div id="close" onclick="removeBarChart()">X</div>
+                    
+                   
+                   
+                   
+               </div>
         
         
            <div id="googlemap"></div>

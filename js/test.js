@@ -136,10 +136,14 @@
                    
                    
               map.panTo(_center);
-                map.setZoom(s*5);
+              // map.setZoom(0);
+                map.setZoom(5);
                 
                 overlay.draw = function(){
                     console.log("overlaydraw_start");
+                    
+                    document.getElementById("label").checked = false;
+                    removeLabels();
               
                         gm_projection = overlay.getProjection();
 
@@ -426,7 +430,65 @@
                                  });
  }
  
- 
+ function loadbarchart(){
+     document.getElementById("hover").style.display = 'inline';
+     document.getElementById("barchartWindow").style.display = 'inline';
+     
+    var svg = dimple.newSvg("#barchartWindow", 500, 400);
+     var data = dataset;
+   
+   var chart = new dimple.chart(svg, data);
+    chart.addCategoryAxis("x", headerNames[0]);
+    chart.addMeasureAxis("y", category);
+    chart.addSeries(null, dimple.plot.bar);
+    chart.draw();
+     
+ }
 
 
-
+function removeBarChart(){
+        document.getElementById("hover").style.display = 'none';
+     document.getElementById("barchartWindow").style.display = 'none';
+	}
+        
+        
+function addLabels(){
+     
+        
+        lbl =  g.selectAll(".subunit-label")
+                  .data(shapefile.features)
+                    .enter().append("text")
+                    .attr("class", function(d) { return "subunit-label " + d.id; })
+                    .attr("transform", function(d) { return "translate(" + gm_path.centroid(d) + ")"; })
+                    .attr("dy", ".35em")
+                    .text(function(d) { 
+                        
+                        if(d.properties.Value === undefined){
+                            return d.properties.NAME_1;
+                         }
+                        else{
+                            // return d.properties.NAME_1+"\n"+d.properties.Value;
+                             return d.properties.NAME_1;
+                        }
+                    });  
+        
+    }
+    
+    function removeLabels(){
+       
+        d3.selectAll(".subunit-label").remove();
+        
+    }
+    
+    function handleLabelCheck(){
+        
+        
+        var checkbox = document.getElementById("label");
+        
+         if(checkbox.checked){
+           addLabels();
+        }else{
+            removeLabels();
+        }
+    }
+        
